@@ -1,0 +1,1 @@
+web: cargonaut serve -listen-address=:$PORT -postgres-url=$DATABASE_URL

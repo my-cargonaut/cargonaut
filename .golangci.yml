@@ -1,0 +1,28 @@
+run:
+  modules-download-mode: vendor
+  skip-dirs:
+    - .build
+    - bin
+    - web
+
+linters:
+  enable:
+    - bodyclose
+    - dogsled
+    - goconst
+    - gofmt
+    - goimports
+    # - maligned
+    - misspell
+    - prealloc
+    - stylecheck
+    - unparam
+    - whitespace
+
+linters-settings:
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: github.com/my-cargonaut/cargonaut
+  govet:
+    check-shadowing: true

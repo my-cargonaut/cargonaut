@@ -1,0 +1,42 @@
+language: go
+
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $GOPATH/pkg/mod
+
+go:
+  - 1.x
+  - master
+
+matrix:
+  allow_failures:
+    - go: master
+  fast_finish: true
+
+stages:
+  - check
+  - test
+  - build
+
+script: make test
+
+after_success: if [ -f coverage.out ]; then bash <(curl -s https://codecov.io/bash); fi
+
+jobs:
+  include:
+    - stage: check
+      script: make lint
+    - script:
+        - make assets
+        - git diff --exit-code
+      after_success: skip
+    - &build
+      stage: build
+      env: TARGET=darwin
+      script: make build GOOS=$TARGET
+      after_success: skip
+    - <<: *build
+      env: TARGET=linux
+    - <<: *build
+      env: TARGET=windows
