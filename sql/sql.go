@@ -2,8 +2,6 @@ package sql
 
 import (
 	"fmt"
-	"net/http"
-	"path/filepath"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -11,15 +9,7 @@ import (
 	migrate "github.com/rubenv/sql-migrate"
 )
 
-type fsWrapper struct {
-	fs http.FileSystem
-}
-
-func (fs fsWrapper) Open(name string) (http.File, error) {
-	name = filepath.Join("/", name)
-	return fs.fs.Open(name)
-}
-
+// Migrate database schema into the given direction.
 func Migrate(db *sqlx.DB, direction migrate.MigrationDirection) (int, error) {
 	migrations, err := fs.NewWithNamespace("migrations")
 	if err != nil {
@@ -27,7 +17,7 @@ func Migrate(db *sqlx.DB, direction migrate.MigrationDirection) (int, error) {
 	}
 
 	n, err := migrate.Exec(db.DB, "postgres", &migrate.HttpFileSystemMigrationSource{
-		FileSystem: fsWrapper{migrations},
+		FileSystem: migrations,
 	}, direction)
 	if err != nil {
 		return 0, fmt.Errorf("apply database migrations: %w", err)

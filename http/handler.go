@@ -171,7 +171,3 @@ func (h *Handler) renderError(w http.ResponseWriter, r *http.Request, code int, 
 		"error":  err.Error(),
 	})
 }
-
-func (h *Handler) renderErrorf(w http.ResponseWriter, r *http.Request, code int, format string, a ...interface{}) {
-	h.renderError(w, r, code, fmt.Errorf(format, a...))
-}
