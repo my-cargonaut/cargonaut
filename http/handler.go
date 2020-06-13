@@ -92,13 +92,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) listUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := h.UserService.ListUsers(r.Context())
-	if err != nil {
+	if users, err := h.UserService.ListUsers(r.Context()); err != nil {
 		h.renderError(w, r, http.StatusInternalServerError, err)
-		return
+	} else {
+		h.renderOK(w, r, users)
 	}
-
-	h.renderOK(w, r, users)
 }
 
 func (h *Handler) getUser(w http.ResponseWriter, r *http.Request) {
@@ -151,8 +149,9 @@ func (h *Handler) deleteUser(w http.ResponseWriter, r *http.Request) {
 		h.renderError(w, r, http.StatusBadRequest, err)
 	} else if err := h.UserService.DeleteUser(r.Context(), id); err != nil {
 		h.renderError(w, r, http.StatusInternalServerError, err)
+	} else {
+		render.NoContent(w, r)
 	}
-	render.NoContent(w, r)
 }
 
 func (h *Handler) render(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
