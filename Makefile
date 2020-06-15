@@ -35,7 +35,7 @@ GOFLAGS			:= -buildmode=exe -tags='osusergo netgo static_build' \
 					-X $(MOD_NAME)/version.buildUser=$(USER)'
 
 GOTESTSUM_FLAGS := --jsonfile=tests.json --junitfile=junit.xml
-GO_TEST_FLAGS   := -race -coverprofile=$(COVERPROFILE)
+GO_TEST_FLAGS   := -coverprofile=$(COVERPROFILE)
 
 # DEPENDENCIES
 GOMODDEPS = go.mod go.sum
@@ -55,10 +55,10 @@ go-pkg-sourcefiles = $(shell $(call go-list-pkg-sources,$(strip $1)))
 all: dep assets fmt lint test build ## Run dep, assets, fmt, lint, test and build.
 
 .PHONY: assets
-assets: sql/migrations/migrations.go http/ui/ui.go ## Build all assets.
+assets: internal/sql/migrations/migrations.go internal/ui/ui.go ## Build all assets.
 	@echo ">> formatting embeeded code"
-	@$(GOFMT) -s -w sql/migrations/migrations.go
-	@$(GOFMT) -s -w http/ui/ui.go
+	@$(GOFMT) -s -w internal/sql/migrations/statik.go
+	@$(GOFMT) -s -w internal/ui/statik.go
 
 .PHONY: build
 build: .build/cargonaut-$(GOOS)-$(GOARCH) ## Build all binaries.
@@ -142,24 +142,21 @@ $(GOPATH)/bin/cargonaut: dep.stamp $(call go-pkg-sourcefiles, ./...)
 
 # STATIK TARGETS
 
-sql/migrations/migrations.go: migrations/*.sql $(STATIK)
+internal/sql/migrations/migrations.go: migrations/*.sql $(STATIK)
 	@echo ">> embedding database migrations"
-	@$(STATIK) -src=migrations -dest=sql -p=migrations -f -m -ns=migrations -include=*.sql
-	@mv -f sql/migrations/statik.go sql/migrations/migrations.go
+	@$(STATIK) -src=migrations -dest=internal/sql -p=migrations -f -m -ns=migrations -include=*.sql
 
-http/ui/ui.go: web/dist $(STATIK)
+internal/ui/ui.go: web/dist $(STATIK)
 	@echo ">> embedding web ui"
-	@$(STATIK) -src=web/dist -dest=http -p=ui -f -m -ns=ui
-	@mv -f http/ui/statik.go http/ui/ui.go
+	@$(STATIK) -src=web/dist -dest=internal -p=ui -f -m -ns=ui
 
 # WEB TARGETS
 
-# web/dist: web/src/main.ts web/src/App.vue web/src/assets/* web/src/components/*.vue web/src/plugins/*.ts web/src/router/*.ts web/src/services/*.ts web/src/views/*.vue
-web/dist: web/src/main.ts web/src/App.vue web/src/components/*.vue web/src/plugins/*.ts web/src/router/*.ts web/src/services/*.ts web/src/views/*.vue
+# web/dist: web/src/App.vue web/src/main.js web/src/api/*.js web/src/assets/* web/src/components/*.vue web/src/plugins/*.js web/src/router/*.js web/src/store/*.js web/src/store/modules/*.js web/src/views/*.vue
+web/dist: web/src/App.vue web/src/main.js web/src/api/*.js web/src/components/*.vue web/src/plugins/*.js web/src/router/*.js web/src/store/*.js web/src/store/modules/*.js web/src/views/*.vue
 	@echo ">> building web ui"
 	@cd web && yarn install
 	@cd web && yarn lint
-	@cd web && yarn test:unit
 	@cd web && yarn build
 
 # MISC TARGETS

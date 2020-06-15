@@ -3,6 +3,11 @@ package cargonaut
 import "errors"
 
 var (
+	// ErrTokenExists is raised when a token with the same unique constraints
+	// already exists.
+	ErrTokenExists = errors.New("token exists")
+	// ErrTokenNotFound is raised when a token does not exist.
+	ErrTokenNotFound = errors.New("token not found")
 	// ErrUserExists is raised when a user with the same unique constraints
 	// already exists.
 	ErrUserExists = errors.New("user exists")

@@ -2,32 +2,50 @@
   <v-app>
     <TopBar />
 
-    <v-content>
-      <v-container fluid>
-        <AlertBox />
-        <v-fade-transition mode="out-in">
-          <router-view></router-view>
-        </v-fade-transition>
-      </v-container>
-    </v-content>
+    <main>
+      <v-main>
+        <v-container fluid>
+          <v-fade-transition mode="out-in">
+            <router-view />
+          </v-fade-transition>
+          <v-footer class="pa-2" fixed app>
+            <v-spacer></v-spacer>
+            <div>
+              Made with <v-icon color="red">mdi-heart</v-icon> by Lukas Malkmus,
+              Philipp Alexander Händler & Robert Feuerhack &copy;
+              {{ new Date().getFullYear() }}
+            </div>
+            <v-spacer></v-spacer>
+          </v-footer>
+        </v-container>
+      </v-main>
+    </main>
   </v-app>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import AlertBox from "./components/AlertBox.vue";
-import TopBar from "./components/TopBar.vue";
+<script>
+import TopBar from "@/components/TopBar";
 
-@Component({
+export default {
+  name: "App",
+
   components: {
-    AlertBox,
     TopBar
+  },
+
+  created() {
+    this.$http.interceptors.response.use(undefined, error => {
+      return new Promise(() => {
+        if (
+          error.status === 401 &&
+          error.config &&
+          !error.config.__isRetryRequest
+        ) {
+          this.$store.dispatch("auth/logout");
+        }
+        throw error;
+      });
+    });
   }
-})
-export default class extends Vue {
-  mounted() {
-    this.$store.dispatch("fuelTank/listFuelTanks");
-    this.$store.dispatch("truck/listTrucks");
-  }
-}
+};
 </script>

@@ -7,7 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	migrate "github.com/rubenv/sql-migrate"
 
-	"github.com/my-cargonaut/cargonaut/sql"
+	"github.com/my-cargonaut/cargonaut/internal/sql"
 )
 
 type migrateConfig struct {
@@ -40,8 +40,7 @@ func migrateCmd(ctx context.Context, args []string, cfg *migrateConfig) error {
 		}
 	}()
 
-	n, err := sql.Migrate(db, direction)
-	if err != nil {
+	if n, err := sql.Migrate(db, direction); err != nil {
 		return fmt.Errorf("migrate database: %w", err)
 	} else if n > 0 {
 		logger.Printf("%s %d database migrations", logPrefix, n)
