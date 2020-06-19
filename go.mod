@@ -18,10 +18,10 @@ require (
 	github.com/manifoldco/promptui v0.7.0
 	github.com/peterbourgon/ff/v2 v2.0.0
 	github.com/rakyll/statik v0.1.7
-	github.com/rubenv/sql-migrate v0.0.0-20200429072036-ae26b214fa43
+	github.com/rubenv/sql-migrate v0.0.0-20200616145509-8d140a17f351
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
-	gotest.tools/gotestsum v0.4.2
+	gotest.tools/gotestsum v0.5.0
 )

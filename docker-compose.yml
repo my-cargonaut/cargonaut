@@ -1,0 +1,23 @@
+version: "3"
+
+volumes:
+  cache_data:
+  database_data:
+
+services:
+  cache:
+    image: redis:alpine
+    ports:
+      - 6379
+    volumes:
+      - cache_data:/data
+
+  database:
+    image: postgres:alpine
+    environment:
+      - POSTGRES_USER=cargonaut
+      - POSTGRES_PASSWORD=cargonaut
+    ports:
+      - 5432
+    volumes:
+      - database_data:/var/lib/postgresql/data
