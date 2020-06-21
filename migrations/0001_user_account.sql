@@ -4,6 +4,8 @@ CREATE TABLE user_account (
     email              character varying(128) NOT NULL,
     password_hash      character varying(128) NOT NULL,
     display_name       character varying(128) NOT NULL,
+    birthday           timestamp WITHOUT TIME ZONE NOT NULL,
+    avatar             BYTEA NOT NULL,
     created_at         timestamp WITHOUT TIME ZONE DEFAULT (now() at time zone 'utc'),
     updated_at         timestamp WITHOUT TIME ZONE DEFAULT (now() at time zone 'utc'),
     CONSTRAINT user_account_pkey PRIMARY KEY (id),

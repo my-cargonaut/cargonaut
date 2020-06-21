@@ -1,4 +1,4 @@
-import authentication from "@/api/authentication";
+import authAPI from "@/api/auth";
 import client from "@/api/client"; // Move this to Vue.$http
 
 const auth = {
@@ -26,7 +26,7 @@ const auth = {
   actions: {
     login({ commit }, auth) {
       return new Promise((resolve, reject) => {
-        authentication
+        authAPI
           .login(auth.username, auth.password)
           .then(response => {
             const token = response.data;
@@ -57,7 +57,7 @@ const auth = {
     },
     refresh({ commit, state }) {
       return new Promise((resolve, reject) => {
-        authentication
+        authAPI
           .refresh(state.token)
           .then(response => {
             const token = response.data;
@@ -88,7 +88,7 @@ const auth = {
     },
     logout({ commit, state }) {
       return new Promise((resolve, reject) => {
-        authentication
+        authAPI
           .logout(state.token)
           .then(resolve())
           .catch(error => {
@@ -115,7 +115,9 @@ const auth = {
 
   getters: {
     isLoggedIn: state => !!state.token && !!state.expiry,
-    authUsername: state => (state.user ? state.user.name : ""),
+    authID: state => (state.user ? state.user.id : ""),
+    authEmail: state => (state.user ? state.user.email : ""),
+    authName: state => (state.user ? state.user.name : ""),
     tokenExpiry: state => state.expiry
   }
 };

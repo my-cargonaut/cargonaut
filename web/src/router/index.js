@@ -15,11 +15,29 @@ const routes = [
     }
   },
   {
+    path: "/register",
+    name: "Register",
+    component: () => import("@/views/Register.vue"),
+    meta: {
+      Title: "My Cargonaut - Register"
+    }
+  },
+  {
     path: "/",
     name: "dashboard",
     component: () => import("@/views/Dashboard.vue"),
     meta: {
       Title: "My Cargonaut - Dashboard",
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/users/:id",
+    name: "profile",
+    component: () => import("@/views/User.vue"),
+    props: true,
+    meta: {
+      Title: "My Cargonaut - Profile",
       requiresAuth: true
     }
   },

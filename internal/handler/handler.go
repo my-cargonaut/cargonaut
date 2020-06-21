@@ -28,7 +28,8 @@ type Handler struct {
 
 	secret []byte
 
-	UserService cargonaut.UserService
+	UserRepository cargonaut.UserRepository
+	TokenBlacklist cargonaut.TokenBlacklist
 }
 
 // NewHandler creates a new set of handlers.
@@ -91,8 +92,12 @@ func NewHandler(log *log.Logger, secret []byte) (*Handler, error) {
 
 		// Authentication routes.
 		api.Post("/auth/login", h.login)
-		api.Patch("/auth/refresh", h.login)
-		api.Post("/auth/logout", h.login)
+		api.Patch("/auth/refresh", h.refresh)
+		api.Post("/auth/logout", h.logout)
+		api.Post("/auth/register", h.register)
+
+		// Special user profile picture route.
+		api.Get("/users/{id}/avatar", h.getUserAvatar)
 
 		// Authenticated routes.
 		api.Group(func(r chi.Router) {
@@ -100,11 +105,13 @@ func NewHandler(log *log.Logger, secret []byte) (*Handler, error) {
 			r.Use(jwtauth.Verifier(jwtauth.New("HS256", secret, nil)))
 			r.Use(jwtauth.Authenticator)
 
-			r.Get("/users", h.listUsers)
+			// r.Get("/users", h.listUsers)
 			r.Get("/users/{id}", h.getUser)
-			r.Post("/users", h.createUser)
-			r.Put("/users/{id}", h.updateUser)
-			r.Delete("/users/{id}", h.deleteUser)
+			// r.Post("/users", h.createUser)
+			// r.Put("/users/{id}", h.updateUser)
+			// r.Delete("/users/{id}", h.deleteUser)
+
+			// r.Get("/users/{id}/rating", h.getUserRating)
 		})
 	})
 

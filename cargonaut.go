@@ -22,12 +22,14 @@ type User struct {
 	Email       string    `json:"email" db:"email"`
 	Password    string    `json:"-" db:"password_hash"`
 	DisplayName string    `json:"display_name" db:"display_name"`
-	CreatedAt   time.Time `json:"createdAt" db:"created_at"`
-	UpdatedAt   time.Time `json:"updatedAt" db:"updated_at"`
+	Birthday    time.Time `json:"birthday" db:"birthday"`
+	Avatar      string    `json:"-" db:"avatar"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
 
-// UserService provides access to the user resource.
-type UserService interface {
+// UserRepository provides access to the user resource.
+type UserRepository interface {
 	// ListUsers lists all users.
 	ListUsers(context.Context) ([]*User, error)
 	// GetUser returns a user identified by his unique ID.
@@ -42,11 +44,21 @@ type UserService interface {
 	DeleteUser(ctx context.Context, userID uuid.UUID) error
 	// ListTokens lists all authentication tokens for the user identified by his
 	// unique ID.
-	ListTokens(ctx context.Context, userID string) ([]*Token, error)
+	ListTokens(ctx context.Context, userID uuid.UUID) ([]*Token, error)
 	// CreateToken creates an authentication token for the user identified by
 	// the tokens unique user ID.
 	CreateToken(ctx context.Context, token *Token) error
 	// DeleteToken deletes an users authentication token. Token and user are
 	// identified by their unique IDs.
-	DeleteToken(ctx context.Context, userID, tokenID string) error
+	DeleteToken(ctx context.Context, userID, tokenID uuid.UUID) error
+}
+
+// TokenBlacklist provides methods for blacklisting authentication tokens.
+type TokenBlacklist interface {
+	// IsTokenBlacklisted retrieves a token by its unique token ID. If the token
+	// is on the blacklist, true is returned.
+	IsTokenBlacklisted(ctx context.Context, tokenID uuid.UUID) (bool, error)
+	// BlacklistToken blacklists one or more tokens by putting them onto the
+	// token blacklist. The tokens are identified by their unique token ID.
+	BlacklistToken(ctx context.Context, tokens ...*Token) error
 }

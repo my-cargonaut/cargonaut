@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"time"
 
+	redigo "github.com/gomodule/redigo/redis"
 	"github.com/jmoiron/sqlx"
 	migrate "github.com/rubenv/sql-migrate"
 
 	"github.com/my-cargonaut/cargonaut/internal/handler"
+	"github.com/my-cargonaut/cargonaut/internal/redis"
 	"github.com/my-cargonaut/cargonaut/internal/sql"
 	"github.com/my-cargonaut/cargonaut/pkg/http"
 )
@@ -32,19 +34,40 @@ func serveCmd(ctx context.Context, _ []string, cfg *serveConfig) error {
 		return errors.New("secret must be 32 bytes long")
 	}
 
-	// Connect to database.
+	// Connect to PostgreSQL database.
 	db, err := sqlx.ConnectContext(ctx, "postgres", cfg.PostgresURL)
 	if err != nil {
-		return fmt.Errorf("create database: %w", err)
+		return fmt.Errorf("connect to database: %w", err)
 	}
 	defer func() {
 		if err = db.Close(); err != nil {
-			logger.Print(err)
+			logger.Printf("close database connection: %s", err)
 		}
 	}()
 	db.SetMaxOpenConns(10)
 	db.SetMaxIdleConns(10)
 	db.SetConnMaxLifetime(time.Minute * 5)
+
+	// Connect to the Redis cache.
+	cache, err := redigo.DialURL(cfg.RedisURL,
+		redigo.DialConnectTimeout(time.Second*5),
+		redigo.DialReadTimeout(time.Second*5),
+		redigo.DialWriteTimeout(time.Second*5),
+		redigo.DialKeepAlive(time.Minute*5),
+	)
+	if err != nil {
+		return fmt.Errorf("connect to cache: %w", err)
+	}
+	defer func() {
+		if err = cache.Close(); err != nil {
+			logger.Printf("close cache connection: %s", err)
+		}
+	}()
+
+	// Check connection to Redis server.
+	if _, err = cache.Do("PING"); err != nil {
+		logger.Printf("check cache connection: %s", err)
+	}
 
 	// Run database migrations, if auto migrate is set.
 	if cfg.Automigrate {
@@ -56,22 +79,25 @@ func serveCmd(ctx context.Context, _ []string, cfg *serveConfig) error {
 		}
 	}
 
-	userService, err := sql.NewUserService(ctx, db)
+	userRepository, err := sql.NewUserRepository(ctx, db)
 	if err != nil {
-		return fmt.Errorf("create truck service: %w", err)
+		return fmt.Errorf("create user repository: %w", err)
 	}
 	defer func() {
-		if err = userService.Close(); err != nil {
-			logger.Print(err)
+		if err = userRepository.Close(); err != nil {
+			logger.Printf("close user repository: %s", err)
 		}
 	}()
+
+	tokenBlacklist := redis.NewTokenBlacklist(cache)
 
 	// Create http handlers.
 	h, err := handler.NewHandler(logger, secret)
 	if err != nil {
 		return fmt.Errorf("create http handler: %w", err)
 	}
-	h.UserService = userService
+	h.UserRepository = userRepository
+	h.TokenBlacklist = tokenBlacklist
 
 	// Run http server.
 	srv, err := http.NewServer(logger, cfg.ListenAddress, h)

@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <TopBar />
+    <Sidebar />
 
     <main>
       <v-main>
@@ -24,13 +24,13 @@
 </template>
 
 <script>
-import TopBar from "@/components/TopBar";
+import Sidebar from "@/components/Sidebar";
 
 export default {
   name: "App",
 
   components: {
-    TopBar
+    Sidebar
   },
 
   created() {

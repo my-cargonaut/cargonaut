@@ -16,5 +16,14 @@ export default {
     return client.post(`/auth/logout`, {
       token: token
     });
+  },
+  register(email, password, display_name, birthday, avatar) {
+    return client.post(`/auth/register`, {
+      email: email,
+      password: password,
+      display_name: display_name,
+      birthday: birthday,
+      avatar: avatar
+    });
   }
 };

@@ -134,6 +134,9 @@ github.com/golangci/prealloc
 github.com/golangci/revgrep
 # github.com/golangci/unconvert v0.0.0-20180507085042-28b1c447d1f4
 github.com/golangci/unconvert
+# github.com/gomodule/redigo v1.8.2
+## explicit
+github.com/gomodule/redigo/redis
 # github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 github.com/google/shlex
 # github.com/gostaticanalysis/analysisutil v0.0.0-20190318220348-4088753ea4d3
@@ -207,6 +210,9 @@ github.com/nbutton23/zxcvbn-go/match
 github.com/nbutton23/zxcvbn-go/matching
 github.com/nbutton23/zxcvbn-go/scoring
 github.com/nbutton23/zxcvbn-go/utils/math
+# github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+## explicit
+github.com/nfnt/resize
 # github.com/pelletier/go-toml v1.6.0
 github.com/pelletier/go-toml
 # github.com/peterbourgon/ff/v2 v2.0.0
