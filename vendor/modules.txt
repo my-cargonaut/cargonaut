@@ -134,7 +134,7 @@ github.com/golangci/prealloc
 github.com/golangci/revgrep
 # github.com/golangci/unconvert v0.0.0-20180507085042-28b1c447d1f4
 github.com/golangci/unconvert
-# github.com/gomodule/redigo v1.8.2
+# github.com/gomodule/redigo v1.8.1
 ## explicit
 github.com/gomodule/redigo/redis
 # github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510

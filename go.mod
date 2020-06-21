@@ -13,7 +13,7 @@ require (
 	github.com/go-chi/jwtauth v4.0.4+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/golangci/golangci-lint v1.27.0
-	github.com/gomodule/redigo v1.8.2
+	github.com/gomodule/redigo v1.8.1
 	github.com/jmoiron/sqlx v1.2.1-0.20190826204134-d7d95172beb5
 	github.com/lib/pq v1.7.0
 	github.com/manifoldco/promptui v0.7.0
