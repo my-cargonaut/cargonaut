@@ -7,23 +7,21 @@ cache:
     - $HOME/.cache/go-build
     - $GOPATH/pkg/mod
 
-go:
-  - 1.x
+go: 1.x
 
 stages:
   - check
   - test
   - build
 
-script: make test
-
-after_success: if [ -f coverage.out ]; then bash <(curl -s https://codecov.io/bash); fi
-
 jobs:
   include:
     - stage: check
       script: make lint
       after_success: skip
+    - stage: test
+      script: make test
+      after_success: if [ -f coverage.out ]; then bash <(curl -s https://codecov.io/bash); fi
     - &build
       stage: build
       env: TARGET=darwin
