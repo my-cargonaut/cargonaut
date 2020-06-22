@@ -24,10 +24,6 @@ jobs:
   include:
     - stage: check
       script: make lint
-    - stage: check
-      script:
-        - make assets
-        - git diff --exit-code
       after_success: skip
     - &build
       stage: build
