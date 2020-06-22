@@ -1,4 +1,6 @@
 language: go
+os: linux
+dist: xenial
 
 cache:
   directories:
@@ -22,7 +24,8 @@ jobs:
   include:
     - stage: check
       script: make lint
-    - script:
+    - stage: check
+      script:
         - make assets
         - git diff --exit-code
       after_success: skip
