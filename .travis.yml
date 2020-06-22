@@ -31,6 +31,4 @@ jobs:
       env: TARGET=linux
     - <<: *build
       env: TARGET=windows
-  allow_failures:
-    - go: master
   fast_finish: true
