@@ -8,7 +8,6 @@
 [![GoDoc][docs_badge]][docs]
 [![Latest Release][release_badge]][release]
 [![License][license_badge]][license]
-[![License Status][license_status_badge]][license_status]
 
 ---
 
@@ -123,7 +122,3 @@ See [LICENSE](LICENSE) for more information.
 [release_badge]: https://img.shields.io/github/release/my-cargonaut/cargonaut.svg?style=flat-square
 [license]: https://opensource.org/licenses/MIT
 [license_badge]: https://img.shields.io/github/license/my-cargonaut/cargonaut.svg?color=blue&style=flat-square
-[license_status]: https://app.fossa.com/projects/git%2Bgithub.com%2Fmy-cargonaut%2Fcargonaut?ref=badge_shield
-[license_status_badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmy-cargonaut%2Fcargonaut.svg
-[license_status_large]: https://app.fossa.com/projects/git%2Bgithub.com%2Fmy-cargonaut%2Fcargonaut?ref=badge_large
-[license_status_large_badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmy-cargonaut%2Fcargonaut.svg?type=large
