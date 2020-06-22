@@ -9,11 +9,6 @@ go:
   - 1.x
   - master
 
-matrix:
-  allow_failures:
-    - go: master
-  fast_finish: true
-
 stages:
   - check
   - test
@@ -40,3 +35,6 @@ jobs:
       env: TARGET=linux
     - <<: *build
       env: TARGET=windows
+  allow_failures:
+    - go: master
+  fast_finish: true
