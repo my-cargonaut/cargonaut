@@ -99,8 +99,6 @@ Distributed under MIT License (`The MIT License`).
 
 See [LICENSE](LICENSE) for more information.
 
-[![License Status Large][license_status_large_badge]][license_status_large]
-
 <!-- Links -->
 
 [Lukas Malkmus]: https://github.com/lukasmalkmus
