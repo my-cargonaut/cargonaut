@@ -18,7 +18,7 @@
           </v-fade-transition>
 
           <v-card-text>
-            <v-form ref="form" v-model="valid" @keyup.native.enter="login">
+            <v-form ref="form" v-model="valid" @keyup.native.enter="register">
               <v-text-field
                 v-model.trim="email"
                 label="E-Mail"

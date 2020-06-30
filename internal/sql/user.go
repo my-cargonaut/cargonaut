@@ -25,7 +25,7 @@ const (
 	createTokenSQL    = "INSERT INTO user_token (id, user_id, expires_at) VALUES (:id, :user_id, :expires_at)"
 	deleteTokenSQL    = "DELETE FROM user_token WHERE user_id = $1 AND id = $2"
 	listRatingsSQL    = "SELECT id, user_id, author_id, comment, value, created_at FROM user_rating WHERE user_id = $1"
-	createRatingSQL   = "INSERT INTO user_rating (id, user_id, author_id, comment, value) VALUES (:id, :user_id, :author_id, :comment, :value)"
+	createRatingSQL   = "INSERT INTO user_rating (user_id, author_id, comment, value) VALUES (:user_id, :author_id, :comment, :value)"
 )
 
 // UserRepository provides access to the user resource backed by a Postgres SQL

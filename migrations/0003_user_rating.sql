@@ -1,10 +1,10 @@
 -- +migrate Up
 CREATE TABLE user_rating (
-    id         uuid NOT NULL,
+    id         uuid NOT NULL DEFAULT uuid_generate_v1mc(),
     user_id    uuid NOT NULL,
     author_id  uuid NOT NULL,
     comment    character varying(128) NOT NULL,
-    value      smallint NOT NULL, 
+    value      numeric NOT NULL, 
     created_at timestamp WITHOUT TIME ZONE DEFAULT (now() at time zone 'utc'),
     CONSTRAINT user_rating_pkey PRIMARY KEY (id),
     CONSTRAINT user_rating_fkey FOREIGN KEY (user_id) REFERENCES user_account (id) ON DELETE CASCADE,

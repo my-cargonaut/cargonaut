@@ -152,14 +152,26 @@ func (h *Handler) userIDFromRequest(ctx context.Context, w http.ResponseWriter, 
 		return uuid.Nil, false
 	}
 
-	if _, ok := claims["user_id"]; !ok {
-		h.renderError(w, r, http.StatusInternalServerError, errors.New("user_id claim missing"))
+	userClaim, ok := claims["user"]
+	if !ok {
+		h.renderError(w, r, http.StatusInternalServerError, errors.New("user claim missing"))
 		return uuid.Nil, false
 	}
 
-	userIDClaim, ok := claims["user_id"].(string)
+	user, ok := userClaim.(map[string]interface{})
 	if !ok {
-		h.renderError(w, r, http.StatusInternalServerError, errors.New("user_id claim is not a string"))
+		h.renderError(w, r, http.StatusInternalServerError, errors.New("could not get user claim missing"))
+		return uuid.Nil, false
+	}
+
+	if _, ok = user["id"]; !ok {
+		h.renderError(w, r, http.StatusInternalServerError, errors.New("user.id claim missing"))
+		return uuid.Nil, false
+	}
+
+	userIDClaim, ok := user["id"].(string)
+	if !ok {
+		h.renderError(w, r, http.StatusInternalServerError, errors.New("user.id claim is not a string"))
 		return uuid.Nil, false
 	}
 

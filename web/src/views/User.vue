@@ -23,17 +23,57 @@
 
         <v-row align="center" class="my-4 mx-0">
           <v-rating
-            :value="4.5"
+            @input="rate"
+            v-model="rating"
             color="amber"
             dense
+            hover
             half-increments
-            :readonly="id == authID"
             size="28"
           ></v-rating>
 
-          <div class="grey--text ml-4">4.5 (413)</div>
+          <div class="grey--text ml-4">
+            {{ ratings.average.toFixed(1) }} ({{ ratings.count }})
+          </div>
         </v-row>
       </v-card-text>
+    </v-card>
+
+    <v-card
+      class="mx-auto my-12"
+      max-width="374"
+      v-if="ratingsWithComment && ratingsWithComment.length > 0"
+    >
+      <v-card-title>
+        Ratings by other Cargonauts
+      </v-card-title>
+
+      <v-list three-line v-for="rating in ratingsWithComment" :key="rating.id">
+        <v-divider></v-divider>
+        <v-list-item @click="profile(rating.author_id)">
+          <v-list-item-avatar class="mt-7">
+            <v-img
+              :src="'/api/v1/users/' + rating.author_id + '/avatar'"
+              alt="Rating author"
+            ></v-img>
+          </v-list-item-avatar>
+
+          <v-list-item-content>
+            <v-list-item-title>
+              <v-rating
+                :value="rating.value"
+                color="amber"
+                dense
+                hover
+                half-increments
+                readonly
+                size="28"
+              ></v-rating>
+            </v-list-item-title>
+            <v-list-item-subtitle>{{ rating.comment }}</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
     </v-card>
   </v-container>
 </template>
@@ -41,25 +81,58 @@
 <script>
 import { mapGetters } from "vuex";
 
+import Alert from "@/components/Alert";
+
 export default {
   name: "User",
+
+  components: {
+    Alert
+  },
 
   props: ["id"],
 
   computed: {
     ...mapGetters("auth", ["authID"]),
-    ...mapGetters("users", ["user"])
+    ...mapGetters("users", ["user", "ratings"])
   },
 
   data: () => ({
-    loading: false
+    loading: false,
+    rating: 0,
+    ratingsWithComment: null
   }),
+
+  methods: {
+    rate() {
+      const id = this.id;
+      const rating = this.rating;
+
+      this.loading = true;
+      this.$store
+        .dispatch("users/rate", {
+          id: id,
+          value: rating
+        })
+        .finally(() => (this.loading = false));
+    },
+
+    profile(id) {
+      this.$router.push("/users/" + id);
+    }
+  },
 
   created() {
     this.loading = true;
-    this.$store
-      .dispatch("users/get", this.id)
-      .finally(() => (this.loading = false));
+    this.$store.dispatch("users/get", this.id).finally(() => {
+      this.loading = false;
+      this.rating = this.ratings.average;
+      if (this.ratings.ratings) {
+        this.ratingsWithComment = this.ratings.ratings.filter(e => {
+          return e.comment != "";
+        });
+      }
+    });
   }
 };
 </script>

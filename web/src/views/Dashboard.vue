@@ -155,13 +155,11 @@ export default {
       this.playerId = "";
       this.loading = false;
     },
-    editStation(item) {
+    editStation() {
       this.stopStream();
-      console.log("edit: " + item);
     },
-    deleteStation(item) {
+    deleteStation() {
       this.stopStream();
-      console.log("delete: " + item);
     }
   },
 

@@ -8,14 +8,12 @@
       expand-on-hover
     >
       <v-list>
-        <v-list-item class="px-2">
+        <v-list-item class="px-2" @click="profile">
           <v-list-item-avatar>
             <v-img :src="'/api/v1/users/' + authID + '/avatar'"></v-img>
           </v-list-item-avatar>
-        </v-list-item>
 
-        <v-list-item @click="profile">
-          <v-list-item-content>
+          <v-list-item-content class="py-1">
             <v-list-item-title class="title">{{ authName }}</v-list-item-title>
             <v-list-item-subtitle>{{ authEmail }}</v-list-item-subtitle>
           </v-list-item-content>

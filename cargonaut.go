@@ -35,7 +35,7 @@ type Rating struct {
 	UserID    uuid.UUID `json:"user_id" db:"user_id" sql:"type:uuid"`
 	AuthorID  uuid.UUID `json:"author_id" db:"author_id" sql:"type:uuid"`
 	Comment   string    `json:"comment" db:"comment"`
-	Value     uint8     `json:"value" db:"value"`
+	Value     float32   `json:"value" db:"value"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
