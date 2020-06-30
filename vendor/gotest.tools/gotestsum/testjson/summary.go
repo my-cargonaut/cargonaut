@@ -82,7 +82,7 @@ func PrintSummary(out io.Writer, execution *Execution, opts Summary) {
 	}
 
 	fmt.Fprintf(out, "\n%s %d tests%s%s%s in %s\n",
-		formatExecStatus(execution.done),
+		formatExecStatus(execution),
 		execution.Total(),
 		formatTestCount(len(execution.Skipped()), "skipped", ""),
 		formatTestCount(len(execution.Failed()), "failure", "s"),
@@ -101,12 +101,15 @@ func formatTestCount(count int, category string, pluralize string) string {
 	return fmt.Sprintf(", %d %s", count, category)
 }
 
-// TODO: maybe color this?
-func formatExecStatus(done bool) string {
-	if done {
-		return "DONE"
+func formatExecStatus(exec *Execution) string {
+	if !exec.done {
+		return ""
 	}
-	return ""
+	var runs string
+	if exec.lastRunID > 0 {
+		runs = fmt.Sprintf(" %d runs,", exec.lastRunID+1)
+	}
+	return "DONE" + runs
 }
 
 // FormatDurationAsSeconds formats a time.Duration as a float with an s suffix.
@@ -168,13 +171,14 @@ func writeTestCaseSummary(out io.Writer, execution executionSummary, conf testCa
 	}
 	fmt.Fprintln(out, "\n=== "+conf.header)
 	for _, tc := range testCases {
-		fmt.Fprintf(out, "=== %s: %s %s (%s)\n",
+		fmt.Fprintf(out, "=== %s: %s %s%s (%s)\n",
 			conf.prefix,
 			RelativePackagePath(tc.Package),
 			tc.Test,
+			formatRunID(tc.RunID),
 			FormatDurationAsSeconds(tc.Elapsed, 2))
 		for _, line := range execution.OutputLines(tc) {
-			if isRunLine(line) || conf.filter(tc.Test, line) {
+			if isFramingLine(line) || conf.filter(tc.Test, line) {
 				continue
 			}
 			fmt.Fprint(out, line)
@@ -218,6 +222,8 @@ func formatSkipped() testCaseFormatConfig {
 	}
 }
 
-func isRunLine(line string) bool {
-	return strings.HasPrefix(line, "=== RUN   Test")
+func isFramingLine(line string) bool {
+	return strings.HasPrefix(line, "=== RUN   Test") ||
+		strings.HasPrefix(line, "=== PAUSE Test") ||
+		strings.HasPrefix(line, "=== CONT  Test")
 }

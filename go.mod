@@ -13,7 +13,7 @@ require (
 	github.com/go-chi/jwtauth v4.0.4+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/golangci/golangci-lint v1.27.0
-	github.com/gomodule/redigo v1.8.1
+	github.com/gomodule/redigo v1.8.2
 	github.com/jmoiron/sqlx v1.2.1-0.20190826204134-d7d95172beb5
 	github.com/lib/pq v1.7.0
 	github.com/manifoldco/promptui v0.7.0
@@ -23,7 +23,7 @@ require (
 	github.com/rubenv/sql-migrate v0.0.0-20200616145509-8d140a17f351
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.6.1
-	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
-	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
-	gotest.tools/gotestsum v0.5.0
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/net v0.0.0-20200625001655-4c5254603344
+	gotest.tools/gotestsum v0.5.1
 )

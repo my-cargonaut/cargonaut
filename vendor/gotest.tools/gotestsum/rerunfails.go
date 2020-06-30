@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
-	"gotest.tools/gotestsum/log"
 	"gotest.tools/gotestsum/testjson"
 )
 
@@ -33,9 +34,6 @@ func rerunFailed(ctx context.Context, opts *options, scanConfig testjson.ScanCon
 			"number of test failures (%d) exceeds maximum (%d) set by --rerun-fails-max-failures",
 			failed, opts.rerunFailsMaxInitialFailures)
 	}
-	if err := hasErrors(scanConfig.Execution); err != nil {
-		return err
-	}
 
 	rec := newFailureRecorderFromExecution(scanConfig.Execution)
 	var lastErr error
@@ -55,6 +53,7 @@ func rerunFailed(ctx context.Context, opts *options, scanConfig testjson.ScanCon
 			}
 
 			cfg := testjson.ScanConfig{
+				RunID:     attempts + 1,
 				Stdout:    goTestProc.stdout,
 				Stderr:    goTestProc.stderr,
 				Handler:   nextRec,
@@ -64,12 +63,7 @@ func rerunFailed(ctx context.Context, opts *options, scanConfig testjson.ScanCon
 				return err
 			}
 			lastErr = goTestProc.cmd.Wait()
-			// 0 and 1 are expected.
-			if ExitCodeWithDefault(lastErr) > 1 {
-				log.Warnf("unexpected go test exit code: %v", lastErr)
-				// TODO: will 'go test' exit with 2 if it panics? maybe return err here.
-			}
-			if err := hasErrors(scanConfig.Execution); err != nil {
+			if err := hasErrors(lastErr, scanConfig.Execution); err != nil {
 				return err
 			}
 			rec = nextRec
@@ -78,11 +72,16 @@ func rerunFailed(ctx context.Context, opts *options, scanConfig testjson.ScanCon
 	return lastErr
 }
 
-func hasErrors(exec *testjson.Execution) error {
-	if len(exec.Errors()) > 0 {
+func hasErrors(err error, exec *testjson.Execution) error {
+	switch {
+	case len(exec.Errors()) > 0:
 		return fmt.Errorf("rerun aborted because previous run had errors")
+	// Exit code 0 and 1 are expected.
+	case ExitCodeWithDefault(err) > 1:
+		return fmt.Errorf("unexpected go test exit code: %v", err)
+	default:
+		return nil
 	}
-	return nil
 }
 
 type failureRecorder struct {
@@ -131,4 +130,54 @@ func goTestRunFlagFromTestCases(tcs []string) string {
 	}
 	buf.WriteString(")$")
 	return buf.String()
+}
+
+func writeRerunFailsReport(opts *options, exec *testjson.Execution) error {
+	if opts.rerunFailsMaxAttempts == 0 || opts.rerunFailsReportFile == "" {
+		return nil
+	}
+
+	type testCaseCounts struct {
+		total  int
+		failed int
+	}
+
+	names := []string{}
+	results := map[string]testCaseCounts{}
+	for _, failure := range exec.Failed() {
+		name := failure.Package + "." + failure.Test
+		if _, ok := results[name]; ok {
+			continue
+		}
+		names = append(names, name)
+
+		pkg := exec.Package(failure.Package)
+		counts := testCaseCounts{}
+
+		for _, tc := range pkg.Failed {
+			if tc.Test == failure.Test {
+				counts.total++
+				counts.failed++
+			}
+		}
+		for _, tc := range pkg.Passed {
+			if tc.Test == failure.Test {
+				counts.total++
+			}
+		}
+		// Skipped tests are not counted, but presumably skipped tests can not fail
+		results[name] = counts
+	}
+
+	fh, err := os.Create(opts.rerunFailsReportFile)
+	if err != nil {
+		return err
+	}
+
+	sort.Strings(names)
+	for _, name := range names {
+		counts := results[name]
+		fmt.Fprintf(fh, "%s: %d runs, %d failures\n", name, counts.total, counts.failed)
+	}
+	return nil
 }
