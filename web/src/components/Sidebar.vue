@@ -27,9 +27,20 @@
       <v-list nav dense>
         <v-list-item to="/">
           <v-list-item-icon>
-            <v-icon>mdi-view-dashboard</v-icon>
+            <v-icon>mdi-magnify</v-icon>
           </v-list-item-icon>
-          <v-list-item-title>Dashboard</v-list-item-title>
+          <v-list-item-title>Suche</v-list-item-title>
+        </v-list-item>
+      </v-list>
+
+      <v-divider></v-divider>
+
+      <v-list nav dense>
+        <v-list-item to="/">
+          <v-list-item-icon>
+            <v-icon>mdi-car</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Fahrt erstellen</v-list-item-title>
         </v-list-item>
       </v-list>
 
