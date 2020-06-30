@@ -3,10 +3,12 @@ package handler
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"io"
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/render"
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/my-cargonaut/cargonaut"
@@ -107,6 +109,48 @@ func (h *Handler) getUser(w http.ResponseWriter, r *http.Request) {
 // 		render.NoContent(w, r)
 // 	}
 // }
+
+func (h *Handler) listUserRatings(w http.ResponseWriter, r *http.Request) {
+	if userID, err := uuid.FromString(chi.URLParam(r, "id")); err != nil {
+		h.renderError(w, r, http.StatusBadRequest, err)
+	} else if ratings, err := h.UserRepository.ListRatings(r.Context(), userID); err != nil {
+		h.renderError(w, r, http.StatusInternalServerError, err)
+	} else {
+		h.renderOK(w, r, ratings)
+	}
+}
+
+func (h *Handler) createUserRating(w http.ResponseWriter, r *http.Request) {
+	authUserID, ok := h.userIDFromRequest(r.Context(), w, r)
+	if !ok {
+		return
+	}
+
+	userID, err := uuid.FromString(chi.URLParam(r, "id"))
+	if err != nil {
+		h.renderError(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	var rating cargonaut.Rating
+	if err := json.NewDecoder(r.Body).Decode(&rating); err != nil {
+		h.renderError(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	// Author is the user who sent the request. User is the user the rating will
+	// be given to.
+	rating.UserID = userID
+	rating.AuthorID = authUserID
+
+	if err := h.UserRepository.CreateRating(r.Context(), &rating); err == cargonaut.ErrRatingExists {
+		h.renderError(w, r, http.StatusConflict, err)
+	} else if err != nil {
+		h.renderError(w, r, http.StatusInternalServerError, err)
+	} else {
+		render.NoContent(w, r)
+	}
+}
 
 func (h *Handler) getUserAvatar(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "image/png")

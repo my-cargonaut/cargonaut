@@ -13,4 +13,7 @@ var (
 	ErrUserExists = errors.New("user exists")
 	// ErrUserNotFound is raised when a user does not exist.
 	ErrUserNotFound = errors.New("user not found")
+	// ErrRatingExists is raised when a rating with the same unique constraints
+	// already exists.
+	ErrRatingExists = errors.New("rating exists")
 )

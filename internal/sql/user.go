@@ -24,6 +24,8 @@ const (
 	listTokensSQL     = "SELECT id, user_id, expires_at, created_at FROM user_token WHERE user_id = $1"
 	createTokenSQL    = "INSERT INTO user_token (id, user_id, expires_at) VALUES (:id, :user_id, :expires_at)"
 	deleteTokenSQL    = "DELETE FROM user_token WHERE user_id = $1 AND id = $2"
+	listRatingsSQL    = "SELECT id, user_id, author_id, comment, value, created_at FROM user_rating WHERE user_id = $1"
+	createRatingSQL   = "INSERT INTO user_rating (id, user_id, author_id, comment, value) VALUES (:id, :user_id, :author_id, :comment, :value)"
 )
 
 // UserRepository provides access to the user resource backed by a Postgres SQL
@@ -40,6 +42,8 @@ type UserRepository struct {
 	listTokensStmt     *sqlx.Stmt
 	createTokenStmt    *sqlx.NamedStmt
 	deleteTokenStmt    *sqlx.Stmt
+	listRatingsStmt    *sqlx.Stmt
+	createRatingStmt   *sqlx.NamedStmt
 }
 
 // NewUserRepository returns a new UserRepository based on top of the provided
@@ -67,13 +71,19 @@ func NewUserRepository(ctx context.Context, db *sqlx.DB) (*UserRepository, error
 		return nil, fmt.Errorf("prepare delete user statement: %w", err)
 	}
 	if s.listTokensStmt, err = db.PreparexContext(ctx, listTokensSQL); err != nil {
-		return nil, fmt.Errorf("prepare list tokens statement: %w", err)
+		return nil, fmt.Errorf("prepare list user tokens statement: %w", err)
 	}
 	if s.createTokenStmt, err = db.PrepareNamedContext(ctx, createTokenSQL); err != nil {
-		return nil, fmt.Errorf("prepare create token statement: %w", err)
+		return nil, fmt.Errorf("prepare create user token statement: %w", err)
 	}
 	if s.deleteTokenStmt, err = db.PreparexContext(ctx, deleteTokenSQL); err != nil {
-		return nil, fmt.Errorf("prepare delete token statement: %w", err)
+		return nil, fmt.Errorf("prepare delete user token statement: %w", err)
+	}
+	if s.listRatingsStmt, err = db.PreparexContext(ctx, listRatingsSQL); err != nil {
+		return nil, fmt.Errorf("prepare list user ratings statement: %w", err)
+	}
+	if s.createRatingStmt, err = db.PrepareNamedContext(ctx, createRatingSQL); err != nil {
+		return nil, fmt.Errorf("prepare create user rating statement: %w", err)
 	}
 
 	return s, nil
@@ -100,13 +110,19 @@ func (s *UserRepository) Close() error {
 		return fmt.Errorf("close delete user statement: %w", err)
 	}
 	if err := s.listTokensStmt.Close(); err != nil {
-		return fmt.Errorf("close create token statement: %w", err)
+		return fmt.Errorf("close create user token statement: %w", err)
 	}
 	if err := s.createTokenStmt.Close(); err != nil {
-		return fmt.Errorf("close update token statement: %w", err)
+		return fmt.Errorf("close update user token statement: %w", err)
 	}
 	if err := s.deleteTokenStmt.Close(); err != nil {
-		return fmt.Errorf("close delete token statement: %w", err)
+		return fmt.Errorf("close delete user token statement: %w", err)
+	}
+	if err := s.listRatingsStmt.Close(); err != nil {
+		return fmt.Errorf("close create user rating statement: %w", err)
+	}
+	if err := s.createRatingStmt.Close(); err != nil {
+		return fmt.Errorf("close update user rating statement: %w", err)
 	}
 
 	return nil
@@ -175,7 +191,9 @@ func (s *UserRepository) DeleteUser(ctx context.Context, id uuid.UUID) error {
 // unique ID.
 func (s *UserRepository) ListTokens(ctx context.Context, userID uuid.UUID) ([]*cargonaut.Token, error) {
 	tokens := make([]*cargonaut.Token, 0)
-	if err := s.listTokensStmt.SelectContext(ctx, &tokens, userID); err != nil {
+	if err := s.listTokensStmt.SelectContext(ctx, &tokens, userID); err == sql.ErrNoRows {
+		return nil, cargonaut.ErrUserNotFound
+	} else if err != nil {
 		return nil, fmt.Errorf("select user tokens from database: %w", err)
 	}
 	return tokens, nil
@@ -198,6 +216,28 @@ func (s *UserRepository) CreateToken(ctx context.Context, token *cargonaut.Token
 func (s *UserRepository) DeleteToken(ctx context.Context, userID, tokenID uuid.UUID) error {
 	if _, err := s.deleteTokenStmt.ExecContext(ctx, userID, tokenID); err != nil {
 		return fmt.Errorf("delete user token from database: %w", err)
+	}
+	return nil
+}
+
+// ListRatings lists all ratings for the user identified by his unique ID.
+func (s *UserRepository) ListRatings(ctx context.Context, userID uuid.UUID) ([]*cargonaut.Rating, error) {
+	ratings := make([]*cargonaut.Rating, 0)
+	if err := s.listRatingsStmt.SelectContext(ctx, &ratings, userID); err == sql.ErrNoRows {
+		return nil, cargonaut.ErrUserNotFound
+	} else if err != nil {
+		return nil, fmt.Errorf("select user ratings from database: %w", err)
+	}
+	return ratings, nil
+}
+
+// CreateRating creates a new rating.
+func (s *UserRepository) CreateRating(ctx context.Context, rating *cargonaut.Rating) error {
+	if _, err := s.createRatingStmt.ExecContext(ctx, rating); err != nil {
+		if isAlreadyExistsError(err) {
+			return cargonaut.ErrRatingExists
+		}
+		return fmt.Errorf("create user rating in database: %w", err)
 	}
 	return nil
 }

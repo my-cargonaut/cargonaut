@@ -28,6 +28,17 @@ type User struct {
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
 
+// Rating is a rating given by a User (Author) to another user. Users can't rate
+// themselves.
+type Rating struct {
+	ID        uuid.UUID `json:"id" db:"id" sql:"type:uuid"`
+	UserID    uuid.UUID `json:"user_id" db:"user_id" sql:"type:uuid"`
+	AuthorID  uuid.UUID `json:"author_id" db:"author_id" sql:"type:uuid"`
+	Comment   string    `json:"comment" db:"comment"`
+	Value     uint8     `json:"value" db:"value"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+
 // UserRepository provides access to the user resource.
 type UserRepository interface {
 	// ListUsers lists all users.
@@ -51,6 +62,10 @@ type UserRepository interface {
 	// DeleteToken deletes an users authentication token. Token and user are
 	// identified by their unique IDs.
 	DeleteToken(ctx context.Context, userID, tokenID uuid.UUID) error
+	// ListRatings lists all ratings for the user identified by his unique ID.
+	ListRatings(ctx context.Context, userID uuid.UUID) ([]*Rating, error)
+	// CreateRating creates a new rating.
+	CreateRating(context.Context, *Rating) error
 }
 
 // TokenBlacklist provides methods for blacklisting authentication tokens.

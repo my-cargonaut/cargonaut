@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -13,6 +14,7 @@ import (
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	"github.com/rakyll/statik/fs"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/my-cargonaut/cargonaut"
 	_ "github.com/my-cargonaut/cargonaut/internal/ui" // UI
@@ -111,7 +113,8 @@ func NewHandler(log *log.Logger, secret []byte) (*Handler, error) {
 			// r.Put("/users/{id}", h.updateUser)
 			// r.Delete("/users/{id}", h.deleteUser)
 
-			// r.Get("/users/{id}/rating", h.getUserRating)
+			r.Get("/users/{id}/ratings", h.listUserRatings)
+			r.Post("/users/{id}/ratings", h.createUserRating)
 		})
 	})
 
@@ -140,4 +143,31 @@ func (h *Handler) renderError(w http.ResponseWriter, r *http.Request, code int, 
 		"status": http.StatusText(code),
 		"error":  err.Error(),
 	})
+}
+
+func (h *Handler) userIDFromRequest(ctx context.Context, w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {
+	_, claims, err := jwtauth.FromContext(ctx)
+	if err != nil {
+		h.renderError(w, r, http.StatusInternalServerError, err)
+		return uuid.Nil, false
+	}
+
+	if _, ok := claims["user_id"]; !ok {
+		h.renderError(w, r, http.StatusInternalServerError, errors.New("user_id claim missing"))
+		return uuid.Nil, false
+	}
+
+	userIDClaim, ok := claims["user_id"].(string)
+	if !ok {
+		h.renderError(w, r, http.StatusInternalServerError, errors.New("user_id claim is not a string"))
+		return uuid.Nil, false
+	}
+
+	userID, err := uuid.FromString(userIDClaim)
+	if err != nil {
+		h.renderError(w, r, http.StatusInternalServerError, err)
+		return uuid.Nil, false
+	}
+
+	return userID, true
 }

@@ -1,76 +1,66 @@
 <template>
-  <div>
-    <v-container>
-      <Alert />
+  <v-container>
+    <Alert />
 
-      <v-card>
-        <v-card-title>
-          Dashboard
-          <v-spacer></v-spacer>
-          <v-text-field
-            v-model="search"
-            append-icon="mdi-magnify"
-            label="Search"
-            single-line
-            hide-details
-          ></v-text-field>
-        </v-card-title>
+    <v-card>
+      <v-card-title>
+        Dashboard
+        <v-spacer></v-spacer>
+        <v-text-field
+          v-model="search"
+          append-icon="mdi-magnify"
+          label="Search"
+          single-line
+          hide-details
+        ></v-text-field>
+      </v-card-title>
 
-        <v-card-text>
-          <v-data-table
-            :loading="loading"
-            :headers="headers"
-            :items="stations"
-            :search="search"
-          >
-            <template v-slot:item.action="{ item }">
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <v-icon
-                    small
-                    class="mr-2"
-                    v-on="on"
-                    :disabled="activeStation(item) && loading"
-                    @click="
-                      activeStation(item) ? stopStream() : playStream(item)
-                    "
-                    >{{
-                      activeStation(item) ? "mdi-pause" : "mdi-play"
-                    }}</v-icon
-                  >
-                </template>
-                <span>{{
-                  activeStation(item) ? "Pause Station" : "Play Station"
-                }}</span>
-              </v-tooltip>
+      <v-card-text>
+        <v-data-table
+          :loading="loading"
+          :headers="headers"
+          :items="stations"
+          :search="search"
+        >
+          <template v-slot:item.action="{ item }">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-icon
+                  small
+                  class="mr-2"
+                  v-on="on"
+                  :disabled="activeStation(item) && loading"
+                  @click="activeStation(item) ? stopStream() : playStream(item)"
+                  >{{ activeStation(item) ? "mdi-pause" : "mdi-play" }}</v-icon
+                >
+              </template>
+              <span>{{
+                activeStation(item) ? "Pause Station" : "Play Station"
+              }}</span>
+            </v-tooltip>
 
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <v-icon
-                    small
-                    class="mr-2"
-                    v-on="on"
-                    @click="editStation(item)"
-                    >mdi-pencil</v-icon
-                  >
-                </template>
-                <span>Edit Station</span>
-              </v-tooltip>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-icon small class="mr-2" v-on="on" @click="editStation(item)"
+                  >mdi-pencil</v-icon
+                >
+              </template>
+              <span>Edit Station</span>
+            </v-tooltip>
 
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <v-icon small v-on="on" @click="deleteStation(item)"
-                    >mdi-delete</v-icon
-                  >
-                </template>
-                <span>Delete Station</span>
-              </v-tooltip>
-            </template>
-          </v-data-table>
-        </v-card-text>
-      </v-card>
-    </v-container>
-  </div>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-icon small v-on="on" @click="deleteStation(item)"
+                  >mdi-delete</v-icon
+                >
+              </template>
+              <span>Delete Station</span>
+            </v-tooltip>
+          </template>
+        </v-data-table>
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
 <script>
