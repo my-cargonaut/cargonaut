@@ -8,7 +8,7 @@
       expand-on-hover
     >
       <v-list>
-        <v-list-item class="px-2" @click="profile">
+        <v-list-item class="px-2" :to="'/users/' + this.authId">
           <v-list-item-avatar>
             <v-img :src="'/api/v1/users/' + authId + '/avatar'"></v-img>
           </v-list-item-avatar>
@@ -56,10 +56,6 @@ export default {
   },
 
   methods: {
-    profile() {
-      this.$router.push("/users/" + this.authId);
-    },
-
     logout() {
       this.$store
         .dispatch("auth/logout")

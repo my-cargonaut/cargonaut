@@ -51,7 +51,7 @@
 
       <v-list three-line v-for="rating in ratingsWithComment" :key="rating.id">
         <v-divider></v-divider>
-        <v-list-item @click="profile(rating.author_id)">
+        <v-list-item :to="'/users/' + rating.author_id">
           <v-list-item-avatar class="mt-7">
             <v-img
               :src="'/api/v1/users/' + rating.author_id + '/avatar'"
@@ -116,10 +116,6 @@ export default {
           value: rating
         })
         .finally(() => (this.loading = false));
-    },
-
-    profile(id) {
-      this.$router.push("/users/" + id);
     }
   },
 
