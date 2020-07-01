@@ -107,14 +107,23 @@ func NewHandler(log *log.Logger, secret []byte) (*Handler, error) {
 			r.Use(jwtauth.Verifier(jwtauth.New("HS256", secret, nil)))
 			r.Use(jwtauth.Authenticator)
 
+			// User API.
 			// r.Get("/users", h.listUsers)
 			r.Get("/users/{id}", h.getUser)
 			// r.Post("/users", h.createUser)
 			// r.Put("/users/{id}", h.updateUser)
 			// r.Delete("/users/{id}", h.deleteUser)
 
+			// User ratings API.
 			r.Get("/users/{id}/ratings", h.listUserRatings)
 			r.Post("/users/{id}/ratings", h.createUserRating)
+
+			// User Vehicles API.
+			r.Get("/users/{user_id}/vehicles", h.listUserVehicles)
+			r.Get("/users/{user_id}/vehicles/{vehicle_id}", h.getUserVehicle)
+			r.Post("/users/{user_id}/vehicles", h.createUserVehicle)
+			r.Put("/users/{user_id}/vehicles/{vehicle_id}", h.updateUserVehicle)
+			r.Delete("/users/{user_id}/vehicles/{vehicle_id}", h.deleteUserVehicle)
 		})
 	})
 

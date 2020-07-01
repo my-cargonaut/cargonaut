@@ -29,7 +29,7 @@
             dense
             hover
             half-increments
-            :readonly="id == authID"
+            :readonly="id == authId"
             size="28"
           ></v-rating>
 
@@ -94,7 +94,7 @@ export default {
   props: ["id"],
 
   computed: {
-    ...mapGetters("auth", ["authID"]),
+    ...mapGetters("auth", ["authId"]),
     ...mapGetters("users", ["user", "ratings"])
   },
 

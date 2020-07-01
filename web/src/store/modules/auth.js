@@ -115,7 +115,7 @@ const auth = {
 
   getters: {
     isLoggedIn: state => !!state.token && !!state.expiry,
-    authID: state => (state.user ? state.user.id : ""),
+    authId: state => (state.user ? state.user.id : ""),
     authEmail: state => (state.user ? state.user.email : ""),
     authName: state => (state.user ? state.user.name : ""),
     tokenExpiry: state => state.expiry

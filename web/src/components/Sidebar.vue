@@ -10,7 +10,7 @@
       <v-list>
         <v-list-item class="px-2" @click="profile">
           <v-list-item-avatar>
-            <v-img :src="'/api/v1/users/' + authID + '/avatar'"></v-img>
+            <v-img :src="'/api/v1/users/' + authId + '/avatar'"></v-img>
           </v-list-item-avatar>
 
           <v-list-item-content class="py-1">
@@ -25,9 +25,9 @@
       <v-list nav dense>
         <v-list-item to="/">
           <v-list-item-icon>
-            <v-icon>mdi-view-dashboard</v-icon>
+            <v-icon>mdi-car</v-icon>
           </v-list-item-icon>
-          <v-list-item-title>Dashboard</v-list-item-title>
+          <v-list-item-title>Garage</v-list-item-title>
         </v-list-item>
       </v-list>
 
@@ -52,12 +52,12 @@ export default {
   name: "Sidebar",
 
   computed: {
-    ...mapGetters("auth", ["isLoggedIn", "authID", "authName", "authEmail"])
+    ...mapGetters("auth", ["isLoggedIn", "authId", "authName", "authEmail"])
   },
 
   methods: {
     profile() {
-      this.$router.push("/users/" + this.authID);
+      this.$router.push("/users/" + this.authId);
     },
 
     logout() {

@@ -13,10 +13,12 @@ const users = {
     },
 
     ratings: {
-      ratings: null,
+      ratings: [],
       count: 0,
       average: 0
-    }
+    },
+
+    vehicles: []
   },
 
   mutations: {
@@ -43,6 +45,9 @@ const users = {
           state.ratings.ratings.reduce((total, next) => total + next.value, 0) /
           state.ratings.ratings.length;
       }
+    },
+    SET_VEHICLES(state, vehicles) {
+      state.vehicles = vehicles;
     }
   },
 
@@ -56,17 +61,9 @@ const users = {
             commit("SET_USER", user);
             resolve(response);
           })
-          .catch(error => {
-            commit(
-              "alert/SET",
-              {
-                message: error.response.data.error,
-                type: "error",
-                title: true
-              },
-              { root: true }
-            );
-            reject(error);
+          .catch(e => {
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
           });
 
         usersAPI
@@ -76,17 +73,9 @@ const users = {
             commit("SET_RATINGS", ratings);
             resolve(response);
           })
-          .catch(error => {
-            commit(
-              "alert/SET",
-              {
-                message: error.response.data.error,
-                type: "error",
-                title: true
-              },
-              { root: true }
-            );
-            reject(error);
+          .catch(e => {
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
           });
       });
     },
@@ -99,17 +88,25 @@ const users = {
             commit("INC_RATING", value);
             resolve(response);
           })
-          .catch(error => {
-            commit(
-              "alert/SET",
-              {
-                message: error.response.data.error,
-                type: "error",
-                title: true
-              },
-              { root: true }
-            );
-            reject(error);
+          .catch(e => {
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
+          });
+      });
+    },
+
+    listVehicles({ commit }, id) {
+      return new Promise((resolve, reject) => {
+        usersAPI
+          .listVehicles(id)
+          .then(response => {
+            const vehicles = response.data;
+            commit("SET_VEHICLES", vehicles);
+            resolve(response);
+          })
+          .catch(e => {
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
           });
       });
     }
@@ -117,8 +114,21 @@ const users = {
 
   getters: {
     user: state => (state.user ? state.user : null),
-    ratings: state => (state.ratings ? state.ratings : null)
+    ratings: state => (state.ratings ? state.ratings : null),
+    vehicles: state => (state.vehicles ? state.vehicles : null)
   }
 };
+
+function getAlert(e) {
+  const alert = {
+    type: "error",
+    message: "Something went wrong!",
+    title: true
+  };
+  if (e.response && e.response.data && e.response.data.error) {
+    alert.message = e.response.data.error;
+  }
+  return alert;
+}
 
 export default users;

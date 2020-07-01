@@ -24,10 +24,10 @@ const routes = [
   },
   {
     path: "/",
-    name: "dashboard",
-    component: () => import("@/views/Dashboard.vue"),
+    name: "garage",
+    component: () => import("@/views/Garage.vue"),
     meta: {
-      Title: "My Cargonaut - Dashboard",
+      Title: "My Cargonaut - Garage",
       requiresAuth: true
     }
   },

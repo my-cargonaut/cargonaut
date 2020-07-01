@@ -28,7 +28,7 @@ type User struct {
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
 
-// Rating is a rating given by a User (Author) to another user. Users can't rate
+// Rating is a rating given by a user (Author) to another user. Users can't rate
 // themselves.
 type Rating struct {
 	ID        uuid.UUID `json:"id" db:"id" sql:"type:uuid"`
@@ -37,6 +37,19 @@ type Rating struct {
 	Comment   string    `json:"comment" db:"comment"`
 	Value     float32   `json:"value" db:"value"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+
+// Vehicle is a vehicle belonging to a user.
+type Vehicle struct {
+	ID                uuid.UUID `json:"id" db:"id" sql:"type:uuid"`
+	UserID            uuid.UUID `json:"user_id" db:"user_id" sql:"type:uuid"`
+	Brand             string    `json:"brand" db:"brand"`
+	Model             string    `json:"model" db:"model"`
+	Passengers        uint8     `json:"passengers" db:"passengers"`
+	LoadingAreaLength float32   `json:"loading_area_length" db:"loading_area_length"`
+	LoadingAreaWidth  float32   `json:"loading_area_width" db:"loading_area_width"`
+	CreatedAt         time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // UserRepository provides access to the user resource.
@@ -66,6 +79,20 @@ type UserRepository interface {
 	ListRatings(ctx context.Context, userID uuid.UUID) ([]*Rating, error)
 	// CreateRating creates a new rating.
 	CreateRating(context.Context, *Rating) error
+	// ListVehicles lists all vehicles for the user identified by his unique ID.
+	ListVehicles(ctx context.Context, userID uuid.UUID) ([]*Vehicle, error)
+	// GetVehicle returns a vehicle identified by his unique ID for the user
+	// identified by his unique ID.
+	GetVehicle(ctx context.Context, userID uuid.UUID, vehicleID uuid.UUID) (*Vehicle, error)
+	// CreateVehicle creates a new vehicle for the user identified by the
+	// vehicles unique user ID.
+	CreateVehicle(context.Context, *Vehicle) error
+	// UpdateVehicle updates a given vehicle for the user identified by the
+	// vehicles unique user ID.
+	UpdateVehicle(context.Context, *Vehicle) error
+	// DeleteVehicle deletes a vehicle identified by his unique ID for the user
+	// identified by his unique ID.
+	DeleteVehicle(ctx context.Context, userID uuid.UUID, vehicleID uuid.UUID) error
 }
 
 // TokenBlacklist provides methods for blacklisting authentication tokens.

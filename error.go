@@ -16,4 +16,9 @@ var (
 	// ErrRatingExists is raised when a rating with the same unique constraints
 	// already exists.
 	ErrRatingExists = errors.New("rating exists")
+	// ErrVehicleExists is raised when a vehicle with the same unique
+	// constraints already exists.
+	ErrVehicleExists = errors.New("vehicle exists")
+	// ErrVehicleNotFound is raised when a vehicle does not exist.
+	ErrVehicleNotFound = errors.New("vehicle not found")
 )
