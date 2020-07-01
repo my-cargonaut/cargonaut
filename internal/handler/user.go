@@ -132,6 +132,11 @@ func (h *Handler) createUserRating(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if uuid.Equal(authUserID, userID) {
+		h.renderErrorf(w, r, http.StatusBadRequest, "can not rate yourself")
+		return
+	}
+
 	var rating cargonaut.Rating
 	if err := json.NewDecoder(r.Body).Decode(&rating); err != nil {
 		h.renderError(w, r, http.StatusBadRequest, err)

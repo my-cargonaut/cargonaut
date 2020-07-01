@@ -29,6 +29,7 @@
             dense
             hover
             half-increments
+            :readonly="id == authID"
             size="28"
           ></v-rating>
 

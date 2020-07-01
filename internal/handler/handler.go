@@ -145,6 +145,11 @@ func (h *Handler) renderError(w http.ResponseWriter, r *http.Request, code int, 
 	})
 }
 
+func (h *Handler) renderErrorf(w http.ResponseWriter, r *http.Request, code int, format string, a ...interface{}) {
+	err := fmt.Errorf(format, a...)
+	h.renderError(w, r, code, err)
+}
+
 func (h *Handler) userIDFromRequest(ctx context.Context, w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {
 	_, claims, err := jwtauth.FromContext(ctx)
 	if err != nil {
@@ -154,24 +159,24 @@ func (h *Handler) userIDFromRequest(ctx context.Context, w http.ResponseWriter, 
 
 	userClaim, ok := claims["user"]
 	if !ok {
-		h.renderError(w, r, http.StatusInternalServerError, errors.New("user claim missing"))
+		h.renderErrorf(w, r, http.StatusInternalServerError, "user claim missing")
 		return uuid.Nil, false
 	}
 
 	user, ok := userClaim.(map[string]interface{})
 	if !ok {
-		h.renderError(w, r, http.StatusInternalServerError, errors.New("could not get user claim missing"))
+		h.renderErrorf(w, r, http.StatusInternalServerError, "could not get user claim missing")
 		return uuid.Nil, false
 	}
 
 	if _, ok = user["id"]; !ok {
-		h.renderError(w, r, http.StatusInternalServerError, errors.New("user.id claim missing"))
+		h.renderErrorf(w, r, http.StatusInternalServerError, "user.id claim missing")
 		return uuid.Nil, false
 	}
 
 	userIDClaim, ok := user["id"].(string)
 	if !ok {
-		h.renderError(w, r, http.StatusInternalServerError, errors.New("user.id claim is not a string"))
+		h.renderErrorf(w, r, http.StatusInternalServerError, "user.id claim is not a string")
 		return uuid.Nil, false
 	}
 
