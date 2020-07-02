@@ -22,6 +22,16 @@
           :items="trips"
           :search="search"
         >
+          <template v-slot:item.user_id="{ item }">
+            <v-btn icon :to="'/users/' + item.user_id">
+              <v-avatar size="36px">
+                <v-img
+                  :src="'/api/v1/users/' + item.user_id + '/avatar'"
+                  alt="Trip user avatar"
+                ></v-img>
+              </v-avatar>
+            </v-btn>
+          </template>
           <template v-slot:item.action="{ item }">
             <v-icon small class="mr-2" @click="editTrip(item)"
               >mdi-pencil</v-icon
@@ -142,6 +152,12 @@ export default {
 
   data: () => ({
     headers: [
+      {
+        text: "User",
+        value: "user_id",
+        sortable: true,
+        align: "start"
+      },
       {
         text: "From",
         value: "start",
