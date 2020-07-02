@@ -80,7 +80,7 @@
                         v-model.number="editedTrip.price"
                         label="Price"
                         prepend-icon="mdi-currency-eur"
-                        :rules="rules"
+                        :rules="numRules"
                         required
                       ></v-text-field>
                     </v-col>
@@ -176,6 +176,10 @@ export default {
     rules: [
       v => !!v || "Field is required",
       v => (v && v.length) >= 3 || "Field must be at least 3 characters"
+    ],
+    numRules: [
+      v => !!v || "Field is required",
+      v => v >= 0 || "Field value must be greater or equal than 0"
     ],
     editedTrip: {},
     editedIndex: -1

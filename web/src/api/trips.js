@@ -11,7 +11,7 @@ export default {
     return client.post(`/trips`, trip);
   },
   update(id, trip) {
-    return client.put(`/trips/`, +id, trip);
+    return client.put(`/trips/` + id, trip);
   },
   delete(id) {
     return client.delete(`/trips/` + id);
