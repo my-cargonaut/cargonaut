@@ -21,4 +21,9 @@ var (
 	ErrVehicleExists = errors.New("vehicle exists")
 	// ErrVehicleNotFound is raised when a vehicle does not exist.
 	ErrVehicleNotFound = errors.New("vehicle not found")
+	// ErrTripExists is raised when a trip with the same unique constraints
+	// already exists.
+	ErrTripExists = errors.New("trip exists")
+	// ErrTripNotFound is raised when a trip does not exist.
+	ErrTripNotFound = errors.New("trip not found")
 )

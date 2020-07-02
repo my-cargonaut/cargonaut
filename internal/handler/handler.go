@@ -30,8 +30,10 @@ type Handler struct {
 
 	secret []byte
 
-	UserRepository cargonaut.UserRepository
-	TokenBlacklist cargonaut.TokenBlacklist
+	TripRepository    cargonaut.TripRepository
+	UserRepository    cargonaut.UserRepository
+	VehicleRepository cargonaut.VehicleRepository
+	TokenBlacklist    cargonaut.TokenBlacklist
 }
 
 // NewHandler creates a new set of handlers.
@@ -107,23 +109,28 @@ func NewHandler(log *log.Logger, secret []byte) (*Handler, error) {
 			r.Use(jwtauth.Verifier(jwtauth.New("HS256", secret, nil)))
 			r.Use(jwtauth.Authenticator)
 
+			// Trip API.
+			r.Get("/trips", h.listTrips)
+			r.Get("/trips/{id}", h.getTrip)
+			r.Post("/trips", h.createTrip)
+			r.Put("/trips/{id}", h.updateTrip)
+			r.Delete("/trips/{id}", h.deleteTrip)
+
 			// User API.
 			// r.Get("/users", h.listUsers)
 			r.Get("/users/{id}", h.getUser)
 			// r.Post("/users", h.createUser)
 			// r.Put("/users/{id}", h.updateUser)
 			// r.Delete("/users/{id}", h.deleteUser)
-
-			// User ratings API.
 			r.Get("/users/{id}/ratings", h.listUserRatings)
 			r.Post("/users/{id}/ratings", h.createUserRating)
 
-			// User Vehicles API.
-			r.Get("/users/{user_id}/vehicles", h.listUserVehicles)
-			r.Get("/users/{user_id}/vehicles/{vehicle_id}", h.getUserVehicle)
-			r.Post("/users/{user_id}/vehicles", h.createUserVehicle)
-			r.Put("/users/{user_id}/vehicles/{vehicle_id}", h.updateUserVehicle)
-			r.Delete("/users/{user_id}/vehicles/{vehicle_id}", h.deleteUserVehicle)
+			// Vehicle API.
+			r.Get("/vehicles", h.listVehicles)
+			r.Get("/vehicles/{id}", h.getVehicle)
+			r.Post("/vehicles", h.createVehicle)
+			r.Put("/vehicles/{id}", h.updateVehicle)
+			r.Delete("/vehicles/{id}", h.deleteVehicle)
 		})
 	})
 

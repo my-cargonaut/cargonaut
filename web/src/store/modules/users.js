@@ -16,9 +16,7 @@ const users = {
       ratings: [],
       count: 0,
       average: 0
-    },
-
-    vehicles: []
+    }
   },
 
   mutations: {
@@ -45,9 +43,6 @@ const users = {
           state.ratings.ratings.reduce((total, next) => total + next.value, 0) /
           state.ratings.ratings.length;
       }
-    },
-    SET_VEHICLES(state, vehicles) {
-      state.vehicles = vehicles;
     }
   },
 
@@ -93,29 +88,12 @@ const users = {
             reject(e);
           });
       });
-    },
-
-    listVehicles({ commit }, id) {
-      return new Promise((resolve, reject) => {
-        usersAPI
-          .listVehicles(id)
-          .then(response => {
-            const vehicles = response.data;
-            commit("SET_VEHICLES", vehicles);
-            resolve(response);
-          })
-          .catch(e => {
-            commit("alert/SET", getAlert(e), { root: true });
-            reject(e);
-          });
-      });
     }
   },
 
   getters: {
-    user: state => (state.user ? state.user : null),
-    ratings: state => (state.ratings ? state.ratings : null),
-    vehicles: state => (state.vehicles ? state.vehicles : null)
+    user: state => (state.user ? state.user : {}),
+    ratings: state => (state.ratings ? state.ratings : [])
   }
 };
 

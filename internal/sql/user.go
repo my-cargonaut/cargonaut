@@ -26,11 +26,6 @@ const (
 	deleteTokenSQL    = "DELETE FROM user_token WHERE user_id = $1 AND id = $2"
 	listRatingsSQL    = "SELECT id, user_id, author_id, comment, value, created_at FROM user_rating WHERE user_id = $1"
 	createRatingSQL   = "INSERT INTO user_rating (user_id, author_id, comment, value) VALUES (:user_id, :author_id, :comment, :value)"
-	listVehiclesSQL   = "SELECT id, user_id, brand, model, passengers, loading_area_length, loading_area_width, created_at, updated_at FROM user_vehicle WHERE user_id = $1"
-	getVehicleSQL     = "SELECT id, user_id, brand, model, passengers, loading_area_length, loading_area_width, created_at, updated_at FROM user_vehicle WHERE user_id = $1 AND id = $2 LIMIT 1"
-	createVehicleSQL  = "INSERT INTO user_vehicle (user_id, brand, model, passengers, loading_area_length, loading_area_width) VALUES (:user_id, :brand, :model, :passengers, :loading_area_length, :loading_area_width)"
-	updateVehicleSQL  = "UPDATE user_vehicle SET brand = :brand, model = :model, passengers = :passengers, loading_area_length = :loading_area_length, loading_area_width = :loading_area_width, updated_at = :updated_at WHERE user_id = :user_id AND id = :id"
-	deleteVehicleSQL  = "DELETE FROM user_vehicle WHERE user_id = $1 AND id = $2"
 )
 
 // UserRepository provides access to the user resource backed by a Postgres SQL
@@ -49,11 +44,6 @@ type UserRepository struct {
 	deleteTokenStmt    *sqlx.Stmt
 	listRatingsStmt    *sqlx.Stmt
 	createRatingStmt   *sqlx.NamedStmt
-	listVehiclesStmt   *sqlx.Stmt
-	getVehicleStmt     *sqlx.Stmt
-	createVehicleStmt  *sqlx.NamedStmt
-	updateVehicleStmt  *sqlx.NamedStmt
-	deleteVehicleStmt  *sqlx.Stmt
 }
 
 // NewUserRepository returns a new UserRepository based on top of the provided
@@ -95,26 +85,11 @@ func NewUserRepository(ctx context.Context, db *sqlx.DB) (*UserRepository, error
 	if s.createRatingStmt, err = db.PrepareNamedContext(ctx, createRatingSQL); err != nil {
 		return nil, fmt.Errorf("prepare create user rating statement: %w", err)
 	}
-	if s.listVehiclesStmt, err = db.PreparexContext(ctx, listVehiclesSQL); err != nil {
-		return nil, fmt.Errorf("prepare list user vehicles statement: %w", err)
-	}
-	if s.getVehicleStmt, err = db.PreparexContext(ctx, getVehicleSQL); err != nil {
-		return nil, fmt.Errorf("prepare get user vehicle statement: %w", err)
-	}
-	if s.createVehicleStmt, err = db.PrepareNamedContext(ctx, createVehicleSQL); err != nil {
-		return nil, fmt.Errorf("prepare create user vehicle statement: %w", err)
-	}
-	if s.updateVehicleStmt, err = db.PrepareNamedContext(ctx, updateVehicleSQL); err != nil {
-		return nil, fmt.Errorf("prepare update user vehicle statement: %w", err)
-	}
-	if s.deleteVehicleStmt, err = db.PreparexContext(ctx, deleteVehicleSQL); err != nil {
-		return nil, fmt.Errorf("prepare delete user vehicle statement: %w", err)
-	}
 
 	return s, nil
 }
 
-// Close the user service and close all prepared statements.
+// Close all prepared statements.
 func (s *UserRepository) Close() error {
 	if err := s.listUsersStmt.Close(); err != nil {
 		return fmt.Errorf("close list user statement: %w", err)
@@ -148,21 +123,6 @@ func (s *UserRepository) Close() error {
 	}
 	if err := s.createRatingStmt.Close(); err != nil {
 		return fmt.Errorf("close update user rating statement: %w", err)
-	}
-	if err := s.listVehiclesStmt.Close(); err != nil {
-		return fmt.Errorf("close list user vehicle statement: %w", err)
-	}
-	if err := s.getVehicleStmt.Close(); err != nil {
-		return fmt.Errorf("close get user vehicle statement: %w", err)
-	}
-	if err := s.createVehicleStmt.Close(); err != nil {
-		return fmt.Errorf("close create user vehicle statement: %w", err)
-	}
-	if err := s.updateVehicleStmt.Close(); err != nil {
-		return fmt.Errorf("close update user vehicle statement: %w", err)
-	}
-	if err := s.deleteVehicleStmt.Close(); err != nil {
-		return fmt.Errorf("close delete user vehicle statement: %w", err)
 	}
 
 	return nil
@@ -278,60 +238,6 @@ func (s *UserRepository) CreateRating(ctx context.Context, rating *cargonaut.Rat
 			return cargonaut.ErrRatingExists
 		}
 		return fmt.Errorf("create user rating in database: %w", err)
-	}
-	return nil
-}
-
-// ListVehicles lists all vehicles for the user identified by his unique ID.
-func (s *UserRepository) ListVehicles(ctx context.Context, userID uuid.UUID) ([]*cargonaut.Vehicle, error) {
-	vehicles := make([]*cargonaut.Vehicle, 0)
-	if err := s.listVehiclesStmt.SelectContext(ctx, &vehicles, userID); err == sql.ErrNoRows {
-		return nil, cargonaut.ErrUserNotFound
-	} else if err != nil {
-		return nil, fmt.Errorf("select vehicles of user %q from database: %w", userID, err)
-	}
-	return vehicles, nil
-}
-
-// GetVehicle returns a vehicle identified by his unique ID for the user
-// identified by his unique ID.
-func (s *UserRepository) GetVehicle(ctx context.Context, userID uuid.UUID, vehicleID uuid.UUID) (*cargonaut.Vehicle, error) {
-	vehicle := new(cargonaut.Vehicle)
-	if err := s.getVehicleStmt.GetContext(ctx, vehicle, userID, vehicleID); err == sql.ErrNoRows {
-		return nil, cargonaut.ErrVehicleNotFound
-	} else if err != nil {
-		return nil, fmt.Errorf("get vehicle %q of user %q from database: %w", vehicleID, userID, err)
-	}
-	return vehicle, nil
-}
-
-// CreateVehicle creates a new vehicle for the user identified by the
-// vehicles unique user ID.
-func (s *UserRepository) CreateVehicle(ctx context.Context, vehicle *cargonaut.Vehicle) error {
-	if _, err := s.createVehicleStmt.ExecContext(ctx, vehicle); isAlreadyExistsError(err) {
-		return cargonaut.ErrVehicleExists
-	} else if err != nil {
-		return fmt.Errorf("create vehicle for user %q in database: %w", vehicle.UserID, err)
-	}
-	return nil
-}
-
-// UpdateVehicle updates a given vehicle for the user identified by the
-// vehicles unique user ID.
-func (s *UserRepository) UpdateVehicle(ctx context.Context, vehicle *cargonaut.Vehicle) error {
-	if _, err := s.updateVehicleStmt.ExecContext(ctx, vehicle); isAlreadyExistsError(err) {
-		return cargonaut.ErrVehicleExists
-	} else if err != nil {
-		return fmt.Errorf("update vehicle %q of user %q in database: %w", vehicle.ID, vehicle.UserID, err)
-	}
-	return nil
-}
-
-// DeleteVehicle deletes a vehicle identified by his unique ID for the user
-// identified by his unique ID.
-func (s *UserRepository) DeleteVehicle(ctx context.Context, userID uuid.UUID, vehicleID uuid.UUID) error {
-	if _, err := s.deleteVehicleStmt.ExecContext(ctx, userID, vehicleID); err != nil {
-		return fmt.Errorf("delete vehicle %q of user %q from database: %w", vehicleID, userID, err)
 	}
 	return nil
 }

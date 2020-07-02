@@ -79,6 +79,16 @@ func serveCmd(ctx context.Context, _ []string, cfg *serveConfig) error {
 		}
 	}
 
+	tripRepository, err := sql.NewTripRepository(ctx, db)
+	if err != nil {
+		return fmt.Errorf("create trip repository: %w", err)
+	}
+	defer func() {
+		if err = tripRepository.Close(); err != nil {
+			logger.Printf("close trip repository: %s", err)
+		}
+	}()
+
 	userRepository, err := sql.NewUserRepository(ctx, db)
 	if err != nil {
 		return fmt.Errorf("create user repository: %w", err)
@@ -89,6 +99,16 @@ func serveCmd(ctx context.Context, _ []string, cfg *serveConfig) error {
 		}
 	}()
 
+	vehicleRepository, err := sql.NewVehicleRepository(ctx, db)
+	if err != nil {
+		return fmt.Errorf("create vehicle repository: %w", err)
+	}
+	defer func() {
+		if err = vehicleRepository.Close(); err != nil {
+			logger.Printf("close vehicle repository: %s", err)
+		}
+	}()
+
 	tokenBlacklist := redis.NewTokenBlacklist(cache)
 
 	// Create http handlers.
@@ -96,7 +116,9 @@ func serveCmd(ctx context.Context, _ []string, cfg *serveConfig) error {
 	if err != nil {
 		return fmt.Errorf("create http handler: %w", err)
 	}
+	h.TripRepository = tripRepository
 	h.UserRepository = userRepository
+	h.VehicleRepository = vehicleRepository
 	h.TokenBlacklist = tokenBlacklist
 
 	// Run http server.

@@ -4,7 +4,7 @@
 
     <v-card>
       <v-card-title>
-        Garage
+        Vehicles
         <v-spacer></v-spacer>
         <v-text-field
           v-model="search"
@@ -117,18 +117,15 @@ import { mapGetters } from "vuex";
 
 import Alert from "@/components/Alert";
 
-import usersAPI from "@/api/users";
-
 export default {
-  name: "Garage",
+  name: "Vehicles",
 
   components: {
     Alert
   },
 
   computed: {
-    ...mapGetters("auth", ["authId"]),
-    ...mapGetters("users", ["user", "vehicles"]),
+    ...mapGetters("vehicles", ["vehicles", "loading"]),
 
     formTitle() {
       return this.editedIndex === -1 ? "New Vehicle" : "Edit Vehicle";
@@ -157,7 +154,6 @@ export default {
       },
       { text: "Actions", value: "action", sortable: false }
     ],
-    loading: false,
     search: "",
     dialog: false,
     valid: false,
@@ -165,31 +161,21 @@ export default {
       v => !!v || "Field is required",
       v => (v && v.length) >= 3 || "Field must be at least 3 characters"
     ],
-    numRules: [v => !!v || "Field is required"],
     editedVehicle: {},
     editedIndex: -1
   }),
 
   methods: {
-    ...mapActions("alert", {
-      setAlert: "set"
-    }),
+    ...mapActions("vehicles", ["list", "create", "update", "delete"]),
 
     saveVehicle() {
       if (this.editedIndex > -1) {
-        usersAPI
-          .updateVehicle(this.authId, this.editedVehicle.id, this.editedVehicle)
-          .then(() => {
-            this.$store.dispatch("users/listVehicles", this.authId);
-          })
-          .catch(e => this.error(e));
+        this.update({
+          id: this.editedVehicle.id,
+          vehicle: this.editedVehicle
+        }).then(() => this.list());
       } else {
-        usersAPI
-          .createVehicle(this.authId, this.editedVehicle)
-          .then(() => {
-            this.$store.dispatch("users/listVehicles", this.authId);
-          })
-          .catch(e => this.error(e));
+        this.create(this.editedVehicle).then(() => this.list());
       }
       this.close();
     },
@@ -202,12 +188,7 @@ export default {
 
     deleteVehicle(vehicle) {
       confirm("Are you sure you want to delete this vehicle?") &&
-        usersAPI
-          .deleteVehicle(this.authId, vehicle.id)
-          .then(() => {
-            this.$store.dispatch("users/listVehicles", this.authId);
-          })
-          .catch(e => this.error(e));
+        this.delete(vehicle.id).then(() => this.list());
     },
 
     close() {
@@ -217,26 +198,11 @@ export default {
         this.editedIndex = -1;
         this.$refs.form.reset();
       }, 300);
-    },
-
-    error(e) {
-      const alert = {
-        type: "error",
-        message: "Something went wrong!",
-        title: true
-      };
-      if (e.response && e.response.data && e.response.data.error) {
-        alert.message = e.response.data.error;
-      }
-      this.setAlert(alert);
     }
   },
 
   created() {
-    this.loading = true;
-    this.$store
-      .dispatch("users/listVehicles", this.authId)
-      .finally(() => (this.loading = false));
+    this.list();
   }
 };
 </script>

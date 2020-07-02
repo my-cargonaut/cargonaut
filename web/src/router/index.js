@@ -7,6 +7,12 @@ Vue.use(VueRouter);
 
 const routes = [
   {
+    path: "/",
+    redirect: {
+      name: "trips"
+    }
+  },
+  {
     path: "/login",
     name: "login",
     component: () => import("@/views/Login.vue"),
@@ -23,11 +29,20 @@ const routes = [
     }
   },
   {
-    path: "/",
-    name: "garage",
-    component: () => import("@/views/Garage.vue"),
+    path: "/trips",
+    name: "trips",
+    component: () => import("@/views/Trips.vue"),
     meta: {
-      Title: "My Cargonaut - Garage",
+      Title: "My Cargonaut - Trips",
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/vehicles",
+    name: "vehicles",
+    component: () => import("@/views/Vehicles.vue"),
+    meta: {
+      Title: "My Cargonaut - Vehicles",
       requiresAuth: true
     }
   },

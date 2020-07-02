@@ -23,11 +23,17 @@
       <v-divider></v-divider>
 
       <v-list nav dense>
-        <v-list-item to="/">
+        <v-list-item to="/trips">
+          <v-list-item-icon>
+            <v-icon>mdi-road-variant</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Trips</v-list-item-title>
+        </v-list-item>
+        <v-list-item to="/vehicles">
           <v-list-item-icon>
             <v-icon>mdi-car</v-icon>
           </v-list-item-icon>
-          <v-list-item-title>Garage</v-list-item-title>
+          <v-list-item-title>Vehicles</v-list-item-title>
         </v-list-item>
       </v-list>
 

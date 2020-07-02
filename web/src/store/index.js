@@ -3,7 +3,9 @@ import Vuex from "vuex";
 
 import alert from "./modules/alert";
 import auth from "./modules/auth";
+import trips from "./modules/trips";
 import users from "./modules/users";
+import vehicles from "./modules/vehicles";
 
 Vue.use(Vuex);
 
@@ -13,6 +15,8 @@ export default new Vuex.Store({
   modules: {
     alert,
     auth,
-    users
+    trips,
+    users,
+    vehicles
   }
 });
