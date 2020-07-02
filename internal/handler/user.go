@@ -157,6 +157,16 @@ func (h *Handler) createUserRating(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handler) listUserVehicles(w http.ResponseWriter, r *http.Request) {
+	if userID, err := uuid.FromString(chi.URLParam(r, "id")); err != nil {
+		h.renderError(w, r, http.StatusBadRequest, err)
+	} else if vehicles, err := h.UserRepository.ListVehicles(r.Context(), userID); err != nil {
+		h.renderError(w, r, http.StatusInternalServerError, err)
+	} else {
+		h.renderOK(w, r, vehicles)
+	}
+}
+
 func (h *Handler) getUserAvatar(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "image/png")
 

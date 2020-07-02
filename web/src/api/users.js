@@ -12,5 +12,8 @@ export default {
       comment: comment,
       value: value
     });
+  },
+  listVehicles(id) {
+    return client.get(`/users/` + id + `/vehicles`);
   }
 };

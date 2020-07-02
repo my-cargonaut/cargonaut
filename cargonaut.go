@@ -119,6 +119,8 @@ type UserRepository interface {
 	ListRatings(ctx context.Context, userID uuid.UUID) ([]*Rating, error)
 	// CreateRating creates a new rating.
 	CreateRating(context.Context, *Rating) error
+	// ListVehicles lists all vehicles for the user identified by his unique ID.
+	ListVehicles(ctx context.Context, userID uuid.UUID) ([]*Vehicle, error)
 }
 
 // VehicleRepository provides access to the vehicle resource.

@@ -11,13 +11,13 @@ import (
 	"github.com/my-cargonaut/cargonaut"
 )
 
-func (h *Handler) listVehicles(w http.ResponseWriter, r *http.Request) {
-	if vehicles, err := h.VehicleRepository.ListVehicles(r.Context()); err != nil {
-		h.renderError(w, r, http.StatusInternalServerError, err)
-	} else {
-		h.renderOK(w, r, vehicles)
-	}
-}
+// func (h *Handler) listVehicles(w http.ResponseWriter, r *http.Request) {
+// 	if vehicles, err := h.VehicleRepository.ListVehicles(r.Context()); err != nil {
+// 		h.renderError(w, r, http.StatusInternalServerError, err)
+// 	} else {
+// 		h.renderOK(w, r, vehicles)
+// 	}
+// }
 
 func (h *Handler) getVehicle(w http.ResponseWriter, r *http.Request) {
 	if id, err := uuid.FromString(chi.URLParam(r, "id")); err != nil {

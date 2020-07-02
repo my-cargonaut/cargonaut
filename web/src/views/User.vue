@@ -80,6 +80,7 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 import { mapGetters } from "vuex";
 
 import Alert from "@/components/Alert";
@@ -95,34 +96,26 @@ export default {
 
   computed: {
     ...mapGetters("auth", ["authId"]),
-    ...mapGetters("users", ["user", "ratings"])
+    ...mapGetters("users", ["user", "ratings", "loading"])
   },
 
   data: () => ({
-    loading: false,
     rating: 0,
     ratingsWithComment: null
   }),
 
   methods: {
+    ...mapActions("users", ["get", "rate"]),
+
     rate() {
       const id = this.id;
       const rating = this.rating;
-
-      this.loading = true;
-      this.$store
-        .dispatch("users/rate", {
-          id: id,
-          value: rating
-        })
-        .finally(() => (this.loading = false));
+      this.rate({ id: id, value: rating });
     }
   },
 
   created() {
-    this.loading = true;
-    this.$store.dispatch("users/get", this.id).finally(() => {
-      this.loading = false;
+    this.get(this.id).finally(() => {
       this.rating = this.ratings.average;
       if (this.ratings.ratings) {
         this.ratingsWithComment = this.ratings.ratings.filter(e => {

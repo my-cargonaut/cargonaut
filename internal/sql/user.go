@@ -15,17 +15,18 @@ import (
 var _ cargonaut.UserRepository = (*UserRepository)(nil)
 
 const (
-	listUsersSQL      = "SELECT id, email, password_hash, display_name, birthday, avatar, created_at, updated_at FROM user_account ORDER BY updated_at DESC"
-	getUserSQL        = "SELECT id, email, password_hash, display_name, birthday, avatar, created_at, updated_at FROM user_account WHERE id = $1 LIMIT 1"
-	getUserByEmailSQL = "SELECT id, email, password_hash, display_name, birthday, avatar, created_at, updated_at FROM user_account WHERE email = $1 LIMIT 1"
-	createUserSQL     = "INSERT INTO user_account (email, password_hash, display_name, birthday, avatar) VALUES (:email, :password_hash, :display_name, :birthday, :avatar)"
-	updateUserSQL     = "UPDATE user_account SET email = :email, password_hash = :password_hash, display_name = :display_name, birthday = :birthday, avatar = :avatar, updated_at = :updated_at WHERE id = :id"
-	deleteUserSQL     = "DELETE FROM user_account WHERE id = $1"
-	listTokensSQL     = "SELECT id, user_id, expires_at, created_at FROM user_token WHERE user_id = $1"
-	createTokenSQL    = "INSERT INTO user_token (id, user_id, expires_at) VALUES (:id, :user_id, :expires_at)"
-	deleteTokenSQL    = "DELETE FROM user_token WHERE user_id = $1 AND id = $2"
-	listRatingsSQL    = "SELECT id, user_id, author_id, comment, value, created_at FROM user_rating WHERE user_id = $1"
-	createRatingSQL   = "INSERT INTO user_rating (user_id, author_id, comment, value) VALUES (:user_id, :author_id, :comment, :value)"
+	listUsersSQL        = "SELECT id, email, password_hash, display_name, birthday, avatar, created_at, updated_at FROM user_account ORDER BY updated_at DESC"
+	getUserSQL          = "SELECT id, email, password_hash, display_name, birthday, avatar, created_at, updated_at FROM user_account WHERE id = $1 LIMIT 1"
+	getUserByEmailSQL   = "SELECT id, email, password_hash, display_name, birthday, avatar, created_at, updated_at FROM user_account WHERE email = $1 LIMIT 1"
+	createUserSQL       = "INSERT INTO user_account (email, password_hash, display_name, birthday, avatar) VALUES (:email, :password_hash, :display_name, :birthday, :avatar)"
+	updateUserSQL       = "UPDATE user_account SET email = :email, password_hash = :password_hash, display_name = :display_name, birthday = :birthday, avatar = :avatar, updated_at = :updated_at WHERE id = :id"
+	deleteUserSQL       = "DELETE FROM user_account WHERE id = $1"
+	listTokensSQL       = "SELECT id, user_id, expires_at, created_at FROM user_token WHERE user_id = $1"
+	createTokenSQL      = "INSERT INTO user_token (id, user_id, expires_at) VALUES (:id, :user_id, :expires_at)"
+	deleteTokenSQL      = "DELETE FROM user_token WHERE user_id = $1 AND id = $2"
+	listRatingsSQL      = "SELECT id, user_id, author_id, comment, value, created_at FROM user_rating WHERE user_id = $1"
+	createRatingSQL     = "INSERT INTO user_rating (user_id, author_id, comment, value) VALUES (:user_id, :author_id, :comment, :value)"
+	listUserVehiclesSQL = "SELECT id, user_id, brand, model, passengers, loading_area_length, loading_area_width, created_at, updated_at FROM vehicle WHERE user_id = $1 ORDER BY updated_at DESC"
 )
 
 // UserRepository provides access to the user resource backed by a Postgres SQL
@@ -33,17 +34,18 @@ const (
 type UserRepository struct {
 	db *sqlx.DB
 
-	listUsersStmt      *sqlx.Stmt
-	getUserStmt        *sqlx.Stmt
-	getByEmailUserStmt *sqlx.Stmt
-	createUserStmt     *sqlx.NamedStmt
-	updateUserStmt     *sqlx.NamedStmt
-	deleteUserStmt     *sqlx.Stmt
-	listTokensStmt     *sqlx.Stmt
-	createTokenStmt    *sqlx.NamedStmt
-	deleteTokenStmt    *sqlx.Stmt
-	listRatingsStmt    *sqlx.Stmt
-	createRatingStmt   *sqlx.NamedStmt
+	listUsersStmt        *sqlx.Stmt
+	getUserStmt          *sqlx.Stmt
+	getByEmailUserStmt   *sqlx.Stmt
+	createUserStmt       *sqlx.NamedStmt
+	updateUserStmt       *sqlx.NamedStmt
+	deleteUserStmt       *sqlx.Stmt
+	listTokensStmt       *sqlx.Stmt
+	createTokenStmt      *sqlx.NamedStmt
+	deleteTokenStmt      *sqlx.Stmt
+	listRatingsStmt      *sqlx.Stmt
+	createRatingStmt     *sqlx.NamedStmt
+	listUserVehiclesStmt *sqlx.Stmt
 }
 
 // NewUserRepository returns a new UserRepository based on top of the provided
@@ -85,6 +87,9 @@ func NewUserRepository(ctx context.Context, db *sqlx.DB) (*UserRepository, error
 	if s.createRatingStmt, err = db.PrepareNamedContext(ctx, createRatingSQL); err != nil {
 		return nil, fmt.Errorf("prepare create user rating statement: %w", err)
 	}
+	if s.listUserVehiclesStmt, err = db.PreparexContext(ctx, listUserVehiclesSQL); err != nil {
+		return nil, fmt.Errorf("prepare list user vehicles statement: %w", err)
+	}
 
 	return s, nil
 }
@@ -119,10 +124,13 @@ func (s *UserRepository) Close() error {
 		return fmt.Errorf("close delete user token statement: %w", err)
 	}
 	if err := s.listRatingsStmt.Close(); err != nil {
-		return fmt.Errorf("close create user rating statement: %w", err)
+		return fmt.Errorf("close list user ratings statement: %w", err)
 	}
 	if err := s.createRatingStmt.Close(); err != nil {
-		return fmt.Errorf("close update user rating statement: %w", err)
+		return fmt.Errorf("close create user rating statement: %w", err)
+	}
+	if err := s.listUserVehiclesStmt.Close(); err != nil {
+		return fmt.Errorf("close list user vehicles statement: %w", err)
 	}
 
 	return nil
@@ -240,4 +248,13 @@ func (s *UserRepository) CreateRating(ctx context.Context, rating *cargonaut.Rat
 		return fmt.Errorf("create user rating in database: %w", err)
 	}
 	return nil
+}
+
+// ListVehicles lists all vehicles for the user identified by his unique ID.
+func (s *UserRepository) ListVehicles(ctx context.Context, userID uuid.UUID) ([]*cargonaut.Vehicle, error) {
+	vehicles := make([]*cargonaut.Vehicle, 0)
+	if err := s.listUserVehiclesStmt.SelectContext(ctx, &vehicles, userID); err != nil {
+		return nil, fmt.Errorf("select vehicles of user %q from database: %w", userID, err)
+	}
+	return vehicles, nil
 }

@@ -86,7 +86,7 @@
                     </v-col>
                     <v-col cols="12" sm="6" md="6">
                       <v-select
-                        :loading="vehiclesLoading"
+                        :loading="usersLoading"
                         :items="combinedVehicleNamesList"
                         item-value="id"
                         item-text="name"
@@ -128,13 +128,14 @@ export default {
   },
 
   computed: {
+    ...mapGetters("auth", ["authId"]),
     ...mapGetters("trips", {
       trips: "trips",
       tripsLoading: "loading"
     }),
-    ...mapGetters("vehicles", {
+    ...mapGetters("users", {
       vehicles: "vehicles",
-      vehiclesLoading: "loading"
+      usersLoading: "loading"
     }),
 
     formTitle() {
@@ -182,7 +183,7 @@ export default {
 
   methods: {
     ...mapActions("trips", ["list", "create", "update", "delete"]),
-    ...mapActions("vehicles", { listVehicles: "list" }),
+    ...mapActions("users", ["listVehicles"]),
 
     saveTrip() {
       if (this.editedIndex > -1) {
@@ -219,7 +220,7 @@ export default {
 
   created() {
     this.list();
-    this.listVehicles();
+    this.listVehicles(this.authId);
   }
 };
 </script>

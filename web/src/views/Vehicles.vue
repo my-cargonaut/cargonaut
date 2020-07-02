@@ -125,7 +125,18 @@ export default {
   },
 
   computed: {
-    ...mapGetters("vehicles", ["vehicles", "loading"]),
+    ...mapGetters("auth", ["authId"]),
+    ...mapGetters("users", {
+      vehicles: "vehicles",
+      usersLoading: "loading"
+    }),
+    ...mapGetters("vehicles", {
+      vehiclesLoading: "loading"
+    }),
+
+    loading() {
+      return this.usersLoading || this.vehiclesLoading;
+    },
 
     formTitle() {
       return this.editedIndex === -1 ? "New Vehicle" : "Edit Vehicle";
@@ -166,16 +177,19 @@ export default {
   }),
 
   methods: {
-    ...mapActions("vehicles", ["list", "create", "update", "delete"]),
+    ...mapActions("users", ["listVehicles"]),
+    ...mapActions("vehicles", ["create", "update", "delete"]),
 
     saveVehicle() {
       if (this.editedIndex > -1) {
         this.update({
           id: this.editedVehicle.id,
           vehicle: this.editedVehicle
-        }).then(() => this.list());
+        }).then(() => this.listVehicles(this.authId));
       } else {
-        this.create(this.editedVehicle).then(() => this.list());
+        this.create(this.editedVehicle).then(() =>
+          this.listVehicles(this.authId)
+        );
       }
       this.close();
     },
@@ -188,7 +202,7 @@ export default {
 
     deleteVehicle(vehicle) {
       confirm("Are you sure you want to delete this vehicle?") &&
-        this.delete(vehicle.id).then(() => this.list());
+        this.delete(vehicle.id).then(() => this.listVehicles(this.authId));
     },
 
     close() {
@@ -202,7 +216,7 @@ export default {
   },
 
   created() {
-    this.list();
+    this.listVehicles(this.authId);
   }
 };
 </script>

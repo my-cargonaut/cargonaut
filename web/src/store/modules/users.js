@@ -4,6 +4,7 @@ const users = {
   namespaced: true,
 
   state: {
+    loading: false,
     user: {
       email: "",
       display_name: "",
@@ -11,7 +12,7 @@ const users = {
       created_at: "",
       updated_at: ""
     },
-
+    vehicles: [],
     ratings: {
       ratings: [],
       count: 0,
@@ -20,8 +21,14 @@ const users = {
   },
 
   mutations: {
+    SET_LOADING(state, loading) {
+      state.loading = loading;
+    },
     SET_USER(state, user) {
       state.user = user;
+    },
+    SET_VEHICLES(state, vehicles) {
+      state.vehicles = vehicles;
     },
     SET_RATINGS(state, ratings) {
       state.ratings.ratings = ratings;
@@ -49,6 +56,7 @@ const users = {
   actions: {
     get({ commit }, id) {
       return new Promise((resolve, reject) => {
+        commit("SET_LOADING", true);
         usersAPI
           .get(id)
           .then(response => {
@@ -59,8 +67,16 @@ const users = {
           .catch(e => {
             commit("alert/SET", getAlert(e), { root: true });
             reject(e);
+          })
+          .finally(() => {
+            commit("SET_LOADING", false);
           });
+      });
+    },
 
+    listRatings({ commit }, id) {
+      return new Promise((resolve, reject) => {
+        commit("SET_LOADING", true);
         usersAPI
           .listRatings(id)
           .then(response => {
@@ -71,11 +87,15 @@ const users = {
           .catch(e => {
             commit("alert/SET", getAlert(e), { root: true });
             reject(e);
+          })
+          .finally(() => {
+            commit("SET_LOADING", false);
           });
       });
     },
 
     rate({ commit }, { id, value }) {
+      commit("SET_LOADING", true);
       return new Promise((resolve, reject) => {
         usersAPI
           .createRating(id, "", value)
@@ -86,13 +106,38 @@ const users = {
           .catch(e => {
             commit("alert/SET", getAlert(e), { root: true });
             reject(e);
+          })
+          .finally(() => {
+            commit("SET_LOADING", false);
+          });
+      });
+    },
+
+    listVehicles({ commit }, id) {
+      return new Promise((resolve, reject) => {
+        commit("SET_LOADING", true);
+        usersAPI
+          .listVehicles(id)
+          .then(response => {
+            const vehicles = response.data;
+            commit("SET_VEHICLES", vehicles);
+            resolve(response);
+          })
+          .catch(e => {
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
+          })
+          .finally(() => {
+            commit("SET_LOADING", false);
           });
       });
     }
   },
 
   getters: {
+    loading: state => (state.loading ? state.loading : false),
     user: state => (state.user ? state.user : {}),
+    vehicles: state => (state.vehicles ? state.vehicles : []),
     ratings: state => (state.ratings ? state.ratings : [])
   }
 };
