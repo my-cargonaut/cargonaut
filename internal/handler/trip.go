@@ -44,7 +44,6 @@ func (h *Handler) createTrip(w http.ResponseWriter, r *http.Request) {
 	}
 
 	trip.UserID = authUserID
-	trip.RiderID = authUserID // FIXME(lukasmalkmus): Dirty hack! We need NULLs!
 	if err := h.TripRepository.CreateTrip(r.Context(), &trip); err == cargonaut.ErrTripExists {
 		h.renderError(w, r, http.StatusConflict, err)
 	} else if err != nil {

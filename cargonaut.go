@@ -30,17 +30,17 @@ type Token struct {
 // Trip is a trip from one location to another one. If no RiderID is assigned,
 // the trip is still available.
 type Trip struct {
-	ID          uuid.UUID `json:"id" db:"id" sql:"type:uuid"`
-	UserID      uuid.UUID `json:"user_id" db:"user_id" sql:"type:uuid"`
-	VehicleID   uuid.UUID `json:"vehicle_id" db:"vehicle_id" sql:"type:uuid"`
-	RiderID     uuid.UUID `json:"rider_id" db:"rider_id" sql:"type:uuid"`
-	Start       string    `json:"start" db:"start"`
-	Destination string    `json:"destination" db:"destination"`
-	Price       float32   `json:"price" db:"price"`
-	Depature    time.Time `json:"depature" db:"depature"`
-	Arrival     time.Time `json:"arrival" db:"arrival"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+	ID          uuid.UUID  `json:"id" db:"id" sql:"type:uuid"`
+	UserID      uuid.UUID  `json:"user_id" db:"user_id" sql:"type:uuid"`
+	VehicleID   uuid.UUID  `json:"vehicle_id" db:"vehicle_id" sql:"type:uuid"`
+	RiderID     *uuid.UUID `json:"rider_id" db:"rider_id" sql:"type:uuid"`
+	Start       string     `json:"start" db:"start"`
+	Destination string     `json:"destination" db:"destination"`
+	Price       float32    `json:"price" db:"price"`
+	Depature    time.Time  `json:"depature" db:"depature"`
+	Arrival     time.Time  `json:"arrival" db:"arrival"`
+	CreatedAt   time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at" db:"updated_at"`
 }
 
 // User represents a user identity.
