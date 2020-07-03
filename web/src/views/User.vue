@@ -105,12 +105,13 @@ export default {
   }),
 
   methods: {
-    ...mapActions("users", ["get", "rate"]),
+    ...mapActions("users", {
+      get: "get",
+      rateUser: "rate"
+    }),
 
     rate() {
-      const id = this.id;
-      const rating = this.rating;
-      this.rate({ id: id, value: rating });
+      this.rateUser({ id: this.id, value: this.rating });
     }
   },
 
