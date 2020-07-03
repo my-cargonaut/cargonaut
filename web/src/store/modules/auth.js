@@ -5,12 +5,16 @@ const auth = {
   namespaced: true,
 
   state: {
+    loading: false,
     token: localStorage.getItem("token") || "",
     expiry: +new Date(localStorage.getItem("token_expiry")) || 0,
     user: parseUserFromJWT(localStorage.getItem("token"))
   },
 
   mutations: {
+    SET_LOADING(state, loading) {
+      state.loading = loading;
+    },
     LOGIN(state, token) {
       state.token = token.token;
       state.expiry = +new Date(token.token_expiry);
@@ -24,8 +28,33 @@ const auth = {
   },
 
   actions: {
+    register({ commit }, user) {
+      return new Promise((resolve, reject) => {
+        commit("SET_LOADING", true);
+        authAPI
+          .register(
+            user.email,
+            user.password,
+            user.display_name,
+            user.birthday,
+            user.avatar
+          )
+          .then(response => {
+            resolve(response);
+          })
+          .catch(e => {
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
+          })
+          .finally(() => {
+            commit("SET_LOADING", false);
+          });
+      });
+    },
+
     login({ commit }, auth) {
       return new Promise((resolve, reject) => {
+        commit("SET_LOADING", true);
         authAPI
           .login(auth.username, auth.password)
           .then(response => {
@@ -38,25 +67,22 @@ const auth = {
             commit("LOGIN", token);
             resolve(response);
           })
-          .catch(error => {
+          .catch(e => {
             localStorage.removeItem("token");
             localStorage.removeItem("token_expiry");
             delete client.defaults.headers.common["Authorization"];
-            commit(
-              "alert/SET",
-              {
-                message: error.response.data.error,
-                type: "error",
-                title: true
-              },
-              { root: true }
-            );
-            reject(error);
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
+          })
+          .finally(() => {
+            commit("SET_LOADING", false);
           });
       });
     },
+
     refresh({ commit, state }) {
       return new Promise((resolve, reject) => {
+        commit("SET_LOADING", true);
         authAPI
           .refresh(state.token)
           .then(response => {
@@ -69,51 +95,42 @@ const auth = {
             commit("LOGIN", token);
             resolve(response);
           })
-          .catch(error => {
+          .catch(e => {
             localStorage.removeItem("token");
             localStorage.removeItem("token_expiry");
             delete client.defaults.headers.common["Authorization"];
-            commit(
-              "alert/SET",
-              {
-                message: error.response.data.error,
-                type: "error",
-                title: true
-              },
-              { root: true }
-            );
-            reject(error);
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
+          })
+          .finally(() => {
+            commit("SET_LOADING", false);
           });
       });
     },
+
     logout({ commit, state }) {
       return new Promise((resolve, reject) => {
+        commit("SET_LOADING", true);
         authAPI
           .logout(state.token)
           .then(resolve())
-          .catch(error => {
-            commit(
-              "alert/SET",
-              {
-                message: error.response.data.error,
-                type: "error",
-                title: true
-              },
-              { root: true }
-            );
-            reject(error);
+          .catch(e => {
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
           })
           .finally(() => {
             localStorage.removeItem("token");
             localStorage.removeItem("token_expiry");
             delete client.defaults.headers.common["Authorization"];
             commit("LOGOUT");
+            commit("SET_LOADING", false);
           });
       });
     }
   },
 
   getters: {
+    loading: state => (state.loading ? state.loading : false),
     isLoggedIn: state => !!state.token && !!state.expiry,
     authId: state => (state.user ? state.user.id : ""),
     authEmail: state => (state.user ? state.user.email : ""),
@@ -140,4 +157,16 @@ function parseUserFromJWT(token) {
   );
   let payload = JSON.parse(jsonPayload);
   return payload.user;
+}
+
+function getAlert(e) {
+  const alert = {
+    type: "error",
+    message: "Something went wrong!",
+    title: true
+  };
+  if (e.response && e.response.data && e.response.data.error) {
+    alert.message = e.response.data.error;
+  }
+  return alert;
 }

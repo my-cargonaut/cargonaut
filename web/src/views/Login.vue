@@ -55,6 +55,9 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
+import { mapGetters } from "vuex";
+
 import Alert from "@/components/Alert";
 
 export default {
@@ -64,8 +67,11 @@ export default {
     Alert
   },
 
+  computed: {
+    ...mapGetters("auth", ["loading"])
+  },
+
   data: () => ({
-    loading: false,
     valid: false,
     username: "",
     password: "",
@@ -73,18 +79,14 @@ export default {
   }),
 
   methods: {
+    ...mapActions("auth", { loginUser: "login" }),
+
     login() {
       if (!this.valid) return;
-
-      const username = this.username;
-      const password = this.password;
-
-      this.loading = true;
-      this.$store
-        .dispatch("auth/login", { username, password })
-        .then(() => this.$router.push("/"))
-        // .catch(error => console.log(error.response.data.error))
-        .finally(() => (this.loading = false));
+      this.loginUser({
+        username: this.username,
+        password: this.password
+      }).then(() => this.$router.push("/"));
     }
   }
 };

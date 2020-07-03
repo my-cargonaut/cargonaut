@@ -63,10 +63,10 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	user, err := h.UserRepository.GetUserByEmail(r.Context(), req.Username)
 	if err == cargonaut.ErrUserNotFound {
 		_, _ = password.Generate(h.secret, "fakework_invalid", password.DefaultCost)
-		h.renderError(w, r, http.StatusUnauthorized, err)
+		h.renderErrorf(w, r, http.StatusUnauthorized, "invalid credentials")
 		return
 	} else if err != nil {
-		h.renderError(w, r, http.StatusInternalServerError, err)
+		h.renderErrorf(w, r, http.StatusInternalServerError, "invalid credentials")
 		return
 	}
 
@@ -74,13 +74,13 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	// is not present in the user resource. If it is present, verify the
 	// provided password.
 	if user.Password == "" {
-		h.renderError(w, r, http.StatusUnauthorized, err)
+		h.renderErrorf(w, r, http.StatusUnauthorized, "invalid credentials")
 		return
 	} else if err = password.Compare(h.secret, req.Password, user.Password); err == password.ErrPasswordMismatch {
-		h.renderError(w, r, http.StatusUnauthorized, err)
+		h.renderErrorf(w, r, http.StatusUnauthorized, "invalid credentials")
 		return
 	} else if err != nil {
-		h.renderError(w, r, http.StatusInternalServerError, err)
+		h.renderErrorf(w, r, http.StatusInternalServerError, "invalid credentials")
 		return
 	}
 
@@ -88,10 +88,10 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	// token in the storage.
 	token, err := jwt.NewToken(h.secret, user)
 	if err != nil {
-		h.renderError(w, r, http.StatusInternalServerError, err)
+		h.renderErrorf(w, r, http.StatusInternalServerError, "invalid credentials")
 		return
 	} else if err = h.UserRepository.CreateToken(r.Context(), token); err != nil {
-		h.renderError(w, r, http.StatusInternalServerError, err)
+		h.renderErrorf(w, r, http.StatusInternalServerError, "invalid credentials")
 		return
 	}
 

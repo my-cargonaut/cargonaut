@@ -127,7 +127,7 @@ func NewHandler(log *log.Logger, secret []byte) (*Handler, error) {
 			r.Get("/users/{id}/vehicles", h.listUserVehicles)
 
 			// Vehicle API.
-			// r.Get("/vehicles", h.listVehicles)
+			r.Get("/vehicles", h.listVehicles)
 			r.Get("/vehicles/{id}", h.getVehicle)
 			r.Post("/vehicles", h.createVehicle)
 			r.Put("/vehicles/{id}", h.updateVehicle)

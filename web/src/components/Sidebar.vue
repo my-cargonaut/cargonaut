@@ -52,6 +52,7 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 import { mapGetters } from "vuex";
 
 export default {
@@ -62,10 +63,12 @@ export default {
   },
 
   methods: {
+    ...mapActions("auth", {
+      logoutUser: "logout"
+    }),
+
     logout() {
-      this.$store
-        .dispatch("auth/logout")
-        .finally(() => this.$router.push("/login"));
+      this.logoutUser().finally(() => this.$router.push("/login"));
     }
   }
 };

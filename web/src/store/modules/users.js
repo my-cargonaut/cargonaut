@@ -142,6 +142,8 @@ const users = {
   }
 };
 
+export default users;
+
 function getAlert(e) {
   const alert = {
     type: "error",
@@ -153,5 +155,3 @@ function getAlert(e) {
   }
   return alert;
 }
-
-export default users;

@@ -102,9 +102,10 @@
 </template>
 
 <script>
-import Alert from "@/components/Alert";
+import { mapActions } from "vuex";
+import { mapGetters } from "vuex";
 
-import authAPI from "@/api/auth";
+import Alert from "@/components/Alert";
 
 export default {
   name: "Register",
@@ -113,8 +114,11 @@ export default {
     Alert
   },
 
+  computed: {
+    ...mapGetters("auth", ["loading"])
+  },
+
   data: () => ({
-    loading: false,
     valid: false,
     email: "",
     password: "",
@@ -144,6 +148,9 @@ export default {
   },
 
   methods: {
+    ...mapActions("auth", { registerUser: "register" }),
+    ...mapActions("alert", { setAlert: "set" }),
+
     save(birthday) {
       this.$refs.birthdayMenu.save(birthday);
     },
@@ -153,33 +160,21 @@ export default {
 
       const birthday = new Date(this.birthday).toISOString();
 
-      this.loading = true;
       getBase64(this.avatar).then(avatar => {
-        authAPI
-          .register(
-            this.email,
-            this.password,
-            this.display_name,
-            birthday,
-            btoa(avatar)
-          )
-          .then(() => {
-            this.$store
-              .dispatch("alert/set", {
-                message: "Registered successfully!",
-                type: "success",
-                title: true
-              })
-              .then(() => this.$router.push("/login"));
-          })
-          .catch(error => {
-            this.$store.dispatch("alert/set", {
-              message: error.response.data.error,
-              type: "error",
-              title: true
-            });
-          })
-          .finally(() => (this.loading = false));
+        this.registerUser({
+          email: this.email,
+          password: this.password,
+          display_name: this.display_name,
+          birthday: birthday,
+          avatar: btoa(avatar)
+        }).then(() => {
+          this.setAlert({
+            message: "Registered successfully!",
+            type: "success",
+            title: true
+          });
+          this.$router.push("/login");
+        });
       });
     }
   }

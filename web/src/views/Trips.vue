@@ -21,6 +21,9 @@
           :headers="headers"
           :items="trips"
           :search="search"
+          show-expand
+          single-expand
+          @item-expanded="getTripVehicle"
         >
           <template v-slot:item.user_id="{ item }">
             <v-btn icon :to="'/users/' + item.user_id">
@@ -37,6 +40,40 @@
               >mdi-pencil</v-icon
             >
             <v-icon small @click="deleteTrip(item)">mdi-delete</v-icon>
+          </template>
+          <template v-slot:expanded-item="{ headers }">
+            <td :colspan="headers.length">
+              <v-chip class="ma-2" color="indigo" text-color="white">
+                <v-avatar left>
+                  <v-icon>mdi-car</v-icon>
+                </v-avatar>
+                {{ tripVehicle.brand }} {{ tripVehicle.model }}
+              </v-chip>
+              <v-chip
+                class="ma-2"
+                color="green"
+                text-color="white"
+                :active="tripVehicle.passengers > 0"
+              >
+                <v-avatar left>
+                  <v-icon>mdi-account-circle</v-icon>
+                </v-avatar>
+                Passengers
+                <v-avatar right class="green darken-4">
+                  {{ tripVehicle.passengers }}
+                </v-avatar>
+              </v-chip>
+              <v-chip
+                class="ma-2"
+                color="orange"
+                text-color="white"
+                :active="tripVehicle.loading_area_length > 0"
+              >
+                {{ tripVehicle.loading_area_length }}cm x
+                {{ tripVehicle.loading_area_width }}cm
+                <v-icon right>mdi-crop</v-icon>
+              </v-chip>
+            </td>
           </template>
         </v-data-table>
 
@@ -86,8 +123,8 @@
                     </v-col>
                     <v-col cols="12" sm="6" md="6">
                       <v-select
-                        :loading="usersLoading"
-                        :items="combinedVehicleNamesList"
+                        :loading="vehiclesLoading"
+                        :items="userVehicles"
                         item-value="id"
                         item-text="name"
                         label="Vehicle"
@@ -133,20 +170,34 @@ export default {
       trips: "trips",
       tripsLoading: "loading"
     }),
-    ...mapGetters("users", {
+    ...mapGetters("vehicles", {
+      tripVehicle: "vehicle",
       vehicles: "vehicles",
-      usersLoading: "loading"
+      vehiclesLoading: "loading"
     }),
 
     formTitle() {
       return this.editedIndex === -1 ? "New Trip" : "Edit Trip";
     },
+
     combinedVehicleNamesList() {
       return this.vehicles.map(vehicle => {
         return {
           id: vehicle.id,
-          name: vehicle.brand + " " + vehicle.model
+          user_id: vehicle.user_id,
+          name: vehicle.brand + " " + vehicle.model,
+          passengers: vehicle.passengers,
+          loading_area_length: vehicle.loading_area_length,
+          loading_area_width: vehicle.loading_area_width,
+          created_at: vehicle.created_at,
+          updated_at: vehicle.updated_at
         };
+      });
+    },
+
+    userVehicles() {
+      return this.combinedVehicleNamesList.filter(vehicle => {
+        return vehicle.user_id == this.authId;
       });
     }
   },
@@ -168,7 +219,8 @@ export default {
       { text: "To", value: "destination", sortable: true },
       { text: "Price (€)", value: "price", sortable: true },
 
-      { text: "Actions", value: "action", sortable: false }
+      { text: "Actions", value: "action", sortable: false },
+      { text: "", value: "data-table-expand" }
     ],
     search: "",
     dialog: false,
@@ -187,7 +239,7 @@ export default {
 
   methods: {
     ...mapActions("trips", ["list", "create", "update", "delete"]),
-    ...mapActions("users", ["listVehicles"]),
+    ...mapActions("vehicles", { listVehicles: "list", getVehicle: "get" }),
 
     saveTrip() {
       if (this.editedIndex > -1) {
@@ -212,6 +264,11 @@ export default {
         this.delete(trip.id).then(() => this.list());
     },
 
+    getTripVehicle({ item, value }) {
+      if (!value) return;
+      this.getVehicle(item.vehicle_id);
+    },
+
     close() {
       this.dialog = false;
       setTimeout(() => {
@@ -224,7 +281,7 @@ export default {
 
   created() {
     this.list();
-    this.listVehicles(this.authId);
+    this.listVehicles();
   }
 };
 </script>

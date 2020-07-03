@@ -99,6 +99,8 @@ const trips = {
   }
 };
 
+export default trips;
+
 function getAlert(e) {
   const alert = {
     type: "error",
@@ -110,5 +112,3 @@ function getAlert(e) {
   }
   return alert;
 }
-
-export default trips;
