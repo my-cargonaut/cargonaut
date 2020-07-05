@@ -115,6 +115,8 @@ func NewHandler(log *log.Logger, secret []byte) (*Handler, error) {
 			r.Post("/trips", h.createTrip)
 			r.Put("/trips/{id}", h.updateTrip)
 			r.Delete("/trips/{id}", h.deleteTrip)
+			r.Get("/trips/{id}/ratings", h.getTripRating)
+			r.Post("/trips/{id}/ratings", h.createTripRating)
 
 			// User API.
 			// r.Get("/users", h.listUsers)
@@ -123,7 +125,6 @@ func NewHandler(log *log.Logger, secret []byte) (*Handler, error) {
 			// r.Put("/users/{id}", h.updateUser)
 			// r.Delete("/users/{id}", h.deleteUser)
 			r.Get("/users/{id}/ratings", h.listUserRatings)
-			r.Post("/users/{id}/ratings", h.createUserRating)
 			r.Get("/users/{id}/vehicles", h.listUserVehicles)
 			r.Post("/users/{user_id}/trips/{trip_id}", h.bookTrip)
 			r.Put("/users/{user_id}/trips/{trip_id}", h.cancelTrip)

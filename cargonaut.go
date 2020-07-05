@@ -13,6 +13,7 @@ type Rating struct {
 	ID        uuid.UUID `json:"id" db:"id" sql:"type:uuid"`
 	UserID    uuid.UUID `json:"user_id" db:"user_id" sql:"type:uuid"`
 	AuthorID  uuid.UUID `json:"author_id" db:"author_id" sql:"type:uuid"`
+	TripID    uuid.UUID `json:"trip_id" db:"trip_id" sql:"type:uuid"`
 	Comment   string    `json:"comment" db:"comment"`
 	Value     float32   `json:"value" db:"value"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
@@ -90,6 +91,10 @@ type TripRepository interface {
 	UpdateTrip(context.Context, *Trip) error
 	// DeleteTrip deletes a trip identified by his unique ID.
 	DeleteTrip(ctx context.Context, id uuid.UUID) error
+	// GetRating gets a rating for a trip.
+	GetRating(ctx context.Context, id uuid.UUID) (*Rating, error)
+	// CreateRating creates a new rating fro a trip.
+	CreateRating(context.Context, *Rating) error
 }
 
 // UserRepository provides access to the user resource.
@@ -117,8 +122,6 @@ type UserRepository interface {
 	DeleteToken(ctx context.Context, userID, tokenID uuid.UUID) error
 	// ListRatings lists all ratings for the user identified by his unique ID.
 	ListRatings(ctx context.Context, userID uuid.UUID) ([]*Rating, error)
-	// CreateRating creates a new rating.
-	CreateRating(context.Context, *Rating) error
 	// ListVehicles lists all vehicles for the user identified by his unique ID.
 	ListVehicles(ctx context.Context, userID uuid.UUID) ([]*Vehicle, error)
 }

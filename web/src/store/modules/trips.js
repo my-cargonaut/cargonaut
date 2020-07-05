@@ -5,7 +5,8 @@ const trips = {
 
   state: {
     loading: false,
-    trips: []
+    trips: [],
+    rating: {}
   },
 
   mutations: {
@@ -14,6 +15,9 @@ const trips = {
     },
     SET_TRIPS(state, trips) {
       state.trips = trips;
+    },
+    SET_RATING(state, rating) {
+      state.rating = rating;
     }
   },
 
@@ -90,12 +94,51 @@ const trips = {
             commit("SET_LOADING", false);
           });
       });
+    },
+
+    getRating({ commit }, id) {
+      return new Promise((resolve, reject) => {
+        commit("SET_LOADING", true);
+        tripsAPI
+          .getRating(id)
+          .then(response => {
+            const rating = response.data;
+            commit("SET_RATING", rating);
+            resolve(response);
+          })
+          .catch(e => {
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
+          })
+          .finally(() => {
+            commit("SET_LOADING", false);
+          });
+      });
+    },
+
+    createRating({ commit }, { id, rating }) {
+      return new Promise((resolve, reject) => {
+        commit("SET_LOADING", true);
+        tripsAPI
+          .createRating(id, rating)
+          .then(response => {
+            resolve(response);
+          })
+          .catch(e => {
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
+          })
+          .finally(() => {
+            commit("SET_LOADING", false);
+          });
+      });
     }
   },
 
   getters: {
     loading: state => (state.loading ? state.loading : false),
-    trips: state => (state.trips ? state.trips : [])
+    trips: state => (state.trips ? state.trips : []),
+    rating: state => (state.rating ? state.rating : {})
   }
 };
 

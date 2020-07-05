@@ -38,18 +38,6 @@ const users = {
         state.ratings.average =
           ratings.reduce((total, next) => total + next.value, 0) /
           ratings.length;
-    },
-    INC_RATING(state, value) {
-      state.ratings.count++;
-
-      if (state.ratings.ratings.length > 0) {
-        state.ratings.ratings.push({
-          value: value
-        });
-        state.ratings.average =
-          state.ratings.ratings.reduce((total, next) => total + next.value, 0) /
-          state.ratings.ratings.length;
-      }
     }
   },
 
@@ -82,25 +70,6 @@ const users = {
           .then(response => {
             const ratings = response.data;
             commit("SET_RATINGS", ratings);
-            resolve(response);
-          })
-          .catch(e => {
-            commit("alert/SET", getAlert(e), { root: true });
-            reject(e);
-          })
-          .finally(() => {
-            commit("SET_LOADING", false);
-          });
-      });
-    },
-
-    rate({ commit }, { id, value }) {
-      return new Promise((resolve, reject) => {
-        commit("SET_LOADING", true);
-        usersAPI
-          .createRating(id, "", value)
-          .then(response => {
-            commit("INC_RATING", value);
             resolve(response);
           })
           .catch(e => {
@@ -174,7 +143,7 @@ const users = {
     loading: state => (state.loading ? state.loading : false),
     user: state => (state.user ? state.user : {}),
     vehicles: state => (state.vehicles ? state.vehicles : []),
-    ratings: state => (state.ratings ? state.ratings : [])
+    ratings: state => (state.ratings ? state.ratings : {})
   }
 };
 

@@ -94,6 +94,10 @@
         <template v-slot:item.status="{ item }">
           {{ getTripStatus(item) }}
         </template>
+        <template v-slot:item.rating="{ item }">
+          {{ item.rating ? item.rating : "-" }}
+          {{ item.rating ? "/5" : "" }}
+        </template>
       </v-data-table>
 
       <v-dialog v-model="dialog" max-width="750px">
@@ -224,6 +228,7 @@ export default {
       { text: "Arrival", value: "arrival", sortable: true },
       { text: "Status", value: "status", sortable: false },
       { text: "Actions", value: "action", sortable: false },
+      { text: "Rating", value: "rating", sortable: false },
       { text: "", value: "data-table-expand" }
     ],
     search: "",

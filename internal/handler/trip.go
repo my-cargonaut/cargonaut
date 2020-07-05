@@ -126,3 +126,60 @@ func (h *Handler) deleteTrip(w http.ResponseWriter, r *http.Request) {
 		render.NoContent(w, r)
 	}
 }
+
+func (h *Handler) getTripRating(w http.ResponseWriter, r *http.Request) {
+	if id, err := uuid.FromString(chi.URLParam(r, "id")); err != nil {
+		h.renderError(w, r, http.StatusBadRequest, err)
+	} else if rating, err := h.TripRepository.GetTrip(r.Context(), id); err == cargonaut.ErrRatingNotFound {
+		h.renderError(w, r, http.StatusNotFound, err)
+	} else if err != nil {
+		h.renderError(w, r, http.StatusInternalServerError, err)
+	} else {
+		h.renderOK(w, r, rating)
+	}
+}
+
+func (h *Handler) createTripRating(w http.ResponseWriter, r *http.Request) {
+	authUserID, ok := h.userIDFromRequest(r.Context(), w, r)
+	if !ok {
+		return
+	}
+
+	tripID, err := uuid.FromString(chi.URLParam(r, "id"))
+	if err != nil {
+		h.renderError(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	var rating cargonaut.Rating
+	if err = json.NewDecoder(r.Body).Decode(&rating); err != nil {
+		h.renderError(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	trip, err := h.TripRepository.GetTrip(r.Context(), tripID)
+	if err == cargonaut.ErrTripNotFound {
+		h.renderError(w, r, http.StatusNotFound, err)
+		return
+	} else if err != nil {
+		h.renderError(w, r, http.StatusInternalServerError, err)
+		return
+	} else if trip.RiderID != nil && !uuid.Equal(*trip.RiderID, authUserID) {
+		h.renderErrorf(w, r, http.StatusForbidden, "can not rate trip taken by another user")
+		return
+	}
+
+	// Author is the user who sent the request. User is the user the rating will
+	// be given to.
+	rating.UserID = trip.UserID
+	rating.AuthorID = authUserID
+	rating.TripID = tripID
+
+	if err := h.TripRepository.CreateRating(r.Context(), &rating); err == cargonaut.ErrRatingExists {
+		h.renderError(w, r, http.StatusConflict, err)
+	} else if err != nil {
+		h.renderError(w, r, http.StatusInternalServerError, err)
+	} else {
+		render.NoContent(w, r)
+	}
+}

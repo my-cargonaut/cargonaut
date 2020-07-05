@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"encoding/base64"
-	"encoding/json"
 	"io"
 	"net/http"
 
@@ -117,43 +116,6 @@ func (h *Handler) listUserRatings(w http.ResponseWriter, r *http.Request) {
 		h.renderError(w, r, http.StatusInternalServerError, err)
 	} else {
 		h.renderOK(w, r, ratings)
-	}
-}
-
-func (h *Handler) createUserRating(w http.ResponseWriter, r *http.Request) {
-	authUserID, ok := h.userIDFromRequest(r.Context(), w, r)
-	if !ok {
-		return
-	}
-
-	userID, err := uuid.FromString(chi.URLParam(r, "id"))
-	if err != nil {
-		h.renderError(w, r, http.StatusBadRequest, err)
-		return
-	}
-
-	if uuid.Equal(authUserID, userID) {
-		h.renderErrorf(w, r, http.StatusBadRequest, "can not rate yourself")
-		return
-	}
-
-	var rating cargonaut.Rating
-	if err := json.NewDecoder(r.Body).Decode(&rating); err != nil {
-		h.renderError(w, r, http.StatusBadRequest, err)
-		return
-	}
-
-	// Author is the user who sent the request. User is the user the rating will
-	// be given to.
-	rating.UserID = userID
-	rating.AuthorID = authUserID
-
-	if err := h.UserRepository.CreateRating(r.Context(), &rating); err == cargonaut.ErrRatingExists {
-		h.renderError(w, r, http.StatusConflict, err)
-	} else if err != nil {
-		h.renderError(w, r, http.StatusInternalServerError, err)
-	} else {
-		render.NoContent(w, r)
 	}
 }
 

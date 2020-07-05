@@ -55,6 +55,19 @@
           <v-list-item-title>Logout</v-list-item-title>
         </v-list-item>
       </v-list>
+
+      <template v-slot:append>
+        <v-list nav dense>
+          <v-list-item-group color="primary">
+            <v-list-item to="/disclaimer">
+              <v-list-item-icon>
+                <v-icon>mdi-information</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Disclaimer</v-list-item-title>
+            </v-list-item>
+          </v-list-item-group>
+        </v-list>
+      </template>
     </v-navigation-drawer>
   </div>
 </template>

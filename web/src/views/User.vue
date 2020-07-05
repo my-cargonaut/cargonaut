@@ -23,13 +23,12 @@
 
         <v-row align="center" class="my-4 mx-0">
           <v-rating
-            @input="rate"
-            v-model="rating"
+            v-model="ratings.average"
             color="amber"
             dense
             hover
             half-increments
-            :readonly="id == authId"
+            readonly
             size="28"
           ></v-rating>
 
@@ -43,15 +42,15 @@
     <v-card
       class="mx-auto my-12"
       max-width="374"
-      v-if="ratingsWithComment && ratingsWithComment.length > 0"
+      v-if="ratings.ratings && ratings.ratings.length > 0"
     >
       <v-card-title>
         Ratings by other Cargonauts
       </v-card-title>
 
-      <v-list three-line v-for="rating in ratingsWithComment" :key="rating.id">
+      <v-list three-line v-for="rating in ratings.ratings" :key="rating.id">
         <v-divider></v-divider>
-        <v-list-item :to="'/users/' + rating.author_id">
+        <v-list-item>
           <v-list-item-avatar class="mt-7">
             <v-img
               :src="'/api/v1/users/' + rating.author_id + '/avatar'"
@@ -99,31 +98,13 @@ export default {
     ...mapGetters("users", ["user", "ratings", "loading"])
   },
 
-  data: () => ({
-    rating: 0,
-    ratingsWithComment: null
-  }),
-
   methods: {
-    ...mapActions("users", {
-      get: "get",
-      rateUser: "rate"
-    }),
-
-    rate() {
-      this.rateUser({ id: this.id, value: this.rating });
-    }
+    ...mapActions("users", ["get", "listRatings"])
   },
 
   created() {
-    this.get(this.id).finally(() => {
-      this.rating = this.ratings.average;
-      if (this.ratings.ratings) {
-        this.ratingsWithComment = this.ratings.ratings.filter(e => {
-          return e.comment != "";
-        });
-      }
-    });
+    this.get(this.id);
+    this.listRatings(this.id);
   }
 };
 </script>

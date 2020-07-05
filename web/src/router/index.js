@@ -60,6 +60,15 @@ const routes = [
     }
   },
   {
+    path: "/disclaimer",
+    name: "disclaimer",
+    component: () => import("@/views/Disclaimer.vue"),
+    props: true,
+    meta: {
+      Title: "My Cargonaut - Disclaimer"
+    }
+  },
+  {
     path: "*",
     name: "not-found",
     component: () => import("@/views/NotFound.vue"),
