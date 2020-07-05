@@ -44,7 +44,7 @@
           <v-card-actions>
             <v-btn color="success" to="/register">Register</v-btn>
             <v-spacer></v-spacer>
-            <v-btn color="info" @click="login" :disabled="!valid || loading"
+            <v-btn color="info" to="/dashboard"
               >Login</v-btn
             >
           </v-card-actions>
