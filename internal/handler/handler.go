@@ -125,6 +125,8 @@ func NewHandler(log *log.Logger, secret []byte) (*Handler, error) {
 			r.Get("/users/{id}/ratings", h.listUserRatings)
 			r.Post("/users/{id}/ratings", h.createUserRating)
 			r.Get("/users/{id}/vehicles", h.listUserVehicles)
+			r.Post("/users/{user_id}/trips/{trip_id}", h.bookTrip)
+			r.Put("/users/{user_id}/trips/{trip_id}", h.cancelTrip)
 
 			// Vehicle API.
 			r.Get("/vehicles", h.listVehicles)

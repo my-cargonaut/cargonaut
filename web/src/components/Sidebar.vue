@@ -23,18 +23,26 @@
       <v-divider></v-divider>
 
       <v-list nav dense>
-        <v-list-item to="/trips" color="primary">
-          <v-list-item-icon>
-            <v-icon>mdi-road-variant</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title>Trips</v-list-item-title>
-        </v-list-item>
-        <v-list-item to="/vehicles" color="primary">
-          <v-list-item-icon>
-            <v-icon>mdi-car</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title>Vehicles</v-list-item-title>
-        </v-list-item>
+        <v-list-item-group color="primary">
+          <v-list-item to="/">
+            <v-list-item-icon>
+              <v-icon>mdi-view-dashboard</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Dashboard</v-list-item-title>
+          </v-list-item>
+          <v-list-item to="/trips">
+            <v-list-item-icon>
+              <v-icon>mdi-road-variant</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Trip Offers</v-list-item-title>
+          </v-list-item>
+          <v-list-item to="/vehicles">
+            <v-list-item-icon>
+              <v-icon>mdi-car</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Vehicles</v-list-item-title>
+          </v-list-item>
+        </v-list-item-group>
       </v-list>
 
       <v-divider></v-divider>

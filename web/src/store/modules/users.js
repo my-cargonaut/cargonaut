@@ -95,8 +95,8 @@ const users = {
     },
 
     rate({ commit }, { id, value }) {
-      commit("SET_LOADING", true);
       return new Promise((resolve, reject) => {
+        commit("SET_LOADING", true);
         usersAPI
           .createRating(id, "", value)
           .then(response => {
@@ -121,6 +121,42 @@ const users = {
           .then(response => {
             const vehicles = response.data;
             commit("SET_VEHICLES", vehicles);
+            resolve(response);
+          })
+          .catch(e => {
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
+          })
+          .finally(() => {
+            commit("SET_LOADING", false);
+          });
+      });
+    },
+
+    bookTrip({ commit }, { userId, tripId }) {
+      return new Promise((resolve, reject) => {
+        commit("SET_LOADING", true);
+        usersAPI
+          .bookTrip(userId, tripId)
+          .then(response => {
+            resolve(response);
+          })
+          .catch(e => {
+            commit("alert/SET", getAlert(e), { root: true });
+            reject(e);
+          })
+          .finally(() => {
+            commit("SET_LOADING", false);
+          });
+      });
+    },
+
+    cancelTrip({ commit }, { userId, tripId }) {
+      return new Promise((resolve, reject) => {
+        commit("SET_LOADING", true);
+        usersAPI
+          .cancelTrip(userId, tripId)
+          .then(response => {
             resolve(response);
           })
           .catch(e => {

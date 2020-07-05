@@ -7,12 +7,6 @@ Vue.use(VueRouter);
 
 const routes = [
   {
-    path: "/",
-    redirect: {
-      name: "trips"
-    }
-  },
-  {
     path: "/login",
     name: "login",
     component: () => import("@/views/Login.vue"),
@@ -26,6 +20,15 @@ const routes = [
     component: () => import("@/views/Register.vue"),
     meta: {
       Title: "My Cargonaut - Register"
+    }
+  },
+  {
+    path: "/",
+    name: "dashboard",
+    component: () => import("@/views/Dashboard.vue"),
+    meta: {
+      Title: "My Cargonaut - Dashboard",
+      requiresAuth: true
     }
   },
   {

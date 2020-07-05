@@ -15,5 +15,11 @@ export default {
   },
   listVehicles(id) {
     return client.get(`/users/` + id + `/vehicles`);
+  },
+  bookTrip(userId, tripId) {
+    return client.post(`/users/` + userId + `/trips/` + tripId);
+  },
+  cancelTrip(userId, tripId) {
+    return client.put(`/users/` + userId + `/trips/` + tripId);
   }
 };

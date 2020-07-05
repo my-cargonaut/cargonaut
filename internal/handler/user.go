@@ -167,6 +167,100 @@ func (h *Handler) listUserVehicles(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handler) bookTrip(w http.ResponseWriter, r *http.Request) {
+	authUserID, ok := h.userIDFromRequest(r.Context(), w, r)
+	if !ok {
+		return
+	}
+
+	userID, err := uuid.FromString(chi.URLParam(r, "user_id"))
+	if err != nil {
+		h.renderError(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	tripID, err := uuid.FromString(chi.URLParam(r, "trip_id"))
+	if err != nil {
+		h.renderError(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	// Make sure we can not book a trip in behalf of another user by making sure
+	// the user ID parameter and the authenticated user match.
+	if !uuid.Equal(userID, authUserID) {
+		h.renderErrorf(w, r, http.StatusForbidden, "can not book trip in behalf of another user")
+		return
+	}
+
+	trip, err := h.TripRepository.GetTrip(r.Context(), tripID)
+	if err == cargonaut.ErrTripNotFound {
+		h.renderError(w, r, http.StatusNotFound, err)
+		return
+	} else if err != nil {
+		h.renderError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	trip.RiderID = &userID
+	if err := h.TripRepository.UpdateTrip(r.Context(), trip); err == cargonaut.ErrTripExists {
+		h.renderError(w, r, http.StatusConflict, err)
+	} else if err != nil {
+		h.renderError(w, r, http.StatusInternalServerError, err)
+	} else {
+		render.NoContent(w, r)
+	}
+}
+
+func (h *Handler) cancelTrip(w http.ResponseWriter, r *http.Request) {
+	authUserID, ok := h.userIDFromRequest(r.Context(), w, r)
+	if !ok {
+		return
+	}
+
+	userID, err := uuid.FromString(chi.URLParam(r, "user_id"))
+	if err != nil {
+		h.renderError(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	tripID, err := uuid.FromString(chi.URLParam(r, "trip_id"))
+	if err != nil {
+		h.renderError(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	// Make sure we can not cancel a trip in behalf of another user by making
+	// sure the user ID parameter and the authenticated user match.
+	if !uuid.Equal(userID, authUserID) {
+		h.renderErrorf(w, r, http.StatusForbidden, "can not cancel trip in behalf of another user")
+		return
+	}
+
+	trip, err := h.TripRepository.GetTrip(r.Context(), tripID)
+	if err == cargonaut.ErrTripNotFound {
+		h.renderError(w, r, http.StatusNotFound, err)
+		return
+	} else if err != nil {
+		h.renderError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	// Make sure we can not cancel a trip we aren't assigned to
+	if trip.RiderID != nil && !uuid.Equal(*trip.RiderID, authUserID) {
+		h.renderErrorf(w, r, http.StatusForbidden, "can not cancel trip in behalf of another user")
+		return
+	}
+
+	trip.RiderID = nil
+	if err := h.TripRepository.UpdateTrip(r.Context(), trip); err == cargonaut.ErrTripExists {
+		h.renderError(w, r, http.StatusConflict, err)
+	} else if err != nil {
+		h.renderError(w, r, http.StatusInternalServerError, err)
+	} else {
+		render.NoContent(w, r)
+	}
+}
+
 func (h *Handler) getUserAvatar(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "image/png")
 
